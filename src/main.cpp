@@ -10,8 +10,8 @@ int main() {
     int i, j;
     scanf("%d %d", &i, &j);
     
-    std::vector<char> c = g.getDiegonalLR(i, j);
+    std::vector<Coord> c = g.getDiegonalRL(Coord{i, j});
     for (int k = 0; k < c.size(); k++) {
-        std::cout << c[k] << "-";
+        std::cout << c[k].string() << "   ->   ";
     }
 }

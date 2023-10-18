@@ -2,6 +2,20 @@
 #include <vector>
 #include <iostream>
 
+class Coord {
+public:
+    int row;
+    int col;
+
+    std::string string() {
+        std::string r = std::string(3, 0);
+        std::sprintf(&(r[0]), "%d", row);
+        r[1] = ':';
+        std::sprintf(&(r[2]), "%d", col);
+        return r;
+    }
+};
+
 class Game{
 public:
     char board[8][8];
@@ -26,61 +40,59 @@ public:
                 std::cout << board[i][j] << "|";
             }
             std::cout << "\n";
-            // for (int j = 0; j < 8; j++) {
-            //     std::cout << "-";
-            // }
-            // std::cout << "\n";
         }
     }
     
-    std::vector<char> getDiegonalLR(int row, int col) {
-        std::vector<char> v = {};
+    std::vector<Coord> getDiegonalLR(Coord c) {
+        std::vector<Coord> v;
 
-        int up_col = col - 1;
-        int i = row - 1;
-        for (; i > 0 && up_col > 0; i--) {
-            up_col--;
+        for (; c.row >= 0 && c.col >= 0; c.row--) {
+            c.col--;
         }
 
-        for (; i < 8 && up_col < 8; i++) {
-            v.push_back(board[i][up_col]);
-            up_col++;
+        for (; c.row < 8 && c.col < 8; c.row++) {
+            v.push_back(Coord{c.row, c.col});
+            c.col++;
         }
 
         return v;
     }
     
-    std::vector<char> getDiegonalRL(int row, int col) {
-        std::vector<char> v = {};
+    std::vector<Coord> getDiegonalRL(Coord c) {
+        std::vector<Coord> v;
 
-        int up_col = col - 1;
-        for (int i = row - 1; i > 0 && up_col < 8; i--) {
-            v.push_back(board[i][up_col]);
-            up_col++;
+        for (;c.row > 0 && c.col < 7;c.row--) {
+            c.col++;
         }
+        std::cout << "i: " << c.row << "\n";
+        std::cout << "up_col: " << c.col << "\n";
 
-        int down_col = col - 1;
-        for (int i = row + 1; i < 8 && down_col > 0; i++) {
-            v.push_back(board[i][up_col]);
-            up_col--;
+        for (; c.row < 8 && c.col >= 0; c.row++) {
+            v.push_back(Coord{c.row, c.col});
+            c.col--;
         }
 
         return v;
     }
 
-    std::vector<char> getCol(int row, int col) {
-        std::vector<char> v = {};
+    std::vector<Coord> getCol(Coord c) {
+        std::vector<Coord> v;
         for (int i = 0; i < 8; i++) {
-            v.push_back(board[i][col]);
+            v.push_back(Coord{i, c.col});
         }
         return v;
     }
 
-    std::vector<char> getRow(int row, int col) {
-        std::vector<char> v = {};
+    std::vector<Coord> getRow(Coord c) {
+        std::vector<Coord> v;
         for (int i = 0; i < 8; i++) {
-            v.push_back(board[row][i]);
+            v.push_back(Coord{c.row, i});
         }
         return v;
+    }
+
+    void play(int player, Coord c) {
+
     }
 };
+
