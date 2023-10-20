@@ -1,98 +1,38 @@
+#include <cstddef>
 #include <cstdio>
 #include <vector>
 #include <iostream>
+#include "board.cpp"
 
-class Coord {
-public:
-    int row;
-    int col;
-
-    std::string string() {
-        std::string r = std::string(3, 0);
-        std::sprintf(&(r[0]), "%d", row);
-        r[1] = ':';
-        std::sprintf(&(r[2]), "%d", col);
-        return r;
-    }
-};
 
 class Game{
 public:
-    char board[8][8];
-    int white_count;
-    int black_count;
+    Board * board;
+    Player * players[2];
+    int curr_idx;
     
-    Game() {
-        int count = 0;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                std::sprintf(&(board[i][j]), "%d", count);
-                count++;
-            }
-        }
-        white_count = 0; 
-        black_count = 0; 
+    Game(Player * player1, Player * player2, char default_square) {
+        board = new Board(default_square);
+
+        (*board)[Coord{3, 4}] = player1->piece;
+        (*board)[Coord{4, 3}] = player1->piece;
+        (*board)[Coord{3, 3}] = player2->piece;
+        (*board)[Coord{4, 4}] = player2->piece;
+
+        players[0] = player1;
+        players[1] = player2;
+
+        curr_idx = 0;
     }
 
-    void display() {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                std::cout << board[i][j] << "|";
-            }
-            std::cout << "\n";
-        }
-    }
-    
-    std::vector<Coord> getDiegonalLR(Coord c) {
-        std::vector<Coord> v;
+    void play(Coord c) {
+        board->playVertical(c, players[curr_idx], players[!curr_idx]);
+        board->playHorizontal(c, players[curr_idx], players[!curr_idx]);
+        board->playDiegonalLR(c, players[curr_idx], players[!curr_idx]);
+        board->playDiegonalRL(c, players[curr_idx], players[!curr_idx]);
 
-        for (; c.row >= 0 && c.col >= 0; c.row--) {
-            c.col--;
-        }
-
-        for (; c.row < 8 && c.col < 8; c.row++) {
-            v.push_back(Coord{c.row, c.col});
-            c.col++;
-        }
-
-        return v;
-    }
-    
-    std::vector<Coord> getDiegonalRL(Coord c) {
-        std::vector<Coord> v;
-
-        for (;c.row > 0 && c.col < 7;c.row--) {
-            c.col++;
-        }
-        std::cout << "i: " << c.row << "\n";
-        std::cout << "up_col: " << c.col << "\n";
-
-        for (; c.row < 8 && c.col >= 0; c.row++) {
-            v.push_back(Coord{c.row, c.col});
-            c.col--;
-        }
-
-        return v;
-    }
-
-    std::vector<Coord> getCol(Coord c) {
-        std::vector<Coord> v;
-        for (int i = 0; i < 8; i++) {
-            v.push_back(Coord{i, c.col});
-        }
-        return v;
-    }
-
-    std::vector<Coord> getRow(Coord c) {
-        std::vector<Coord> v;
-        for (int i = 0; i < 8; i++) {
-            v.push_back(Coord{c.row, i});
-        }
-        return v;
-    }
-
-    void play(int player, Coord c) {
-
+        (*board)[c] = players[curr_idx]->piece;
+        curr_idx = !curr_idx;
     }
 };
 
