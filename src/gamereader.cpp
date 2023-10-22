@@ -1,7 +1,8 @@
 #include "game.cpp"
 #include <functional>
 #include <map>
-#include <unistd.h>
+#include <chrono>
+#include <thread>
 
 class GameReader {
 private:
@@ -28,7 +29,7 @@ public:
         int best_move_count = moves.begin()->first;
 
         std::cout << "\n playing " << moves[best_move_count].row << " " << moves[best_move_count].col << "\n";
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         game->play(moves[best_move_count]);
     }
 };
