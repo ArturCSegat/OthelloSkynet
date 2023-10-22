@@ -25,22 +25,48 @@ public:
         curr_idx = 0;
     }
 
-    void play(Coord c) {
+    int play(Coord c) {
+        
+        if ((*board)[c] != board->empty_square_marker) {
+            // std::cout << "\n Invalid move, square already occupied. played by " << players[curr_idx]->piece << "\n\n";
+            return 0;
+        }
 
-        int old = players[0]->piece_count;
+        int old = players[curr_idx]->piece_count;
 
         board->playVertical(c, players[curr_idx], players[!curr_idx]);
         board->playHorizontal(c, players[curr_idx], players[!curr_idx]);
         board->playDiegonalLR(c, players[curr_idx], players[!curr_idx]);
         board->playDiegonalRL(c, players[curr_idx], players[!curr_idx]);
 
-        if (players[0]->piece_count == old) {
-            std::cout << "\n Invalid move, must flip at least 1 piece \n\n";
-            return;
+        if (players[curr_idx]->piece_count == old) {
+            // std::cout << "\n Invalid move, must flip at least 1 piece. played by " << players[curr_idx]->piece << "\n\n";
+            return 0;
         }
 
         (*board)[c] = players[curr_idx]->piece;
         curr_idx = !curr_idx;
+        return players[!curr_idx]->piece_count - old;
+    }
+
+    Game clone() {
+        Player * p1 = new Player(players[0]->piece);
+        p1->piece_count = players[0]->piece_count;
+        Player * p2 = new Player(players[1]->piece);
+        p2->piece_count = players[1]->piece_count;
+        char df = board->empty_square_marker;
+
+        Game g =  Game(p1, p2, df);
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                g.board->board[i][j] = (*board)[Coord{i, j}];
+            }
+        }
+
+        g.curr_idx = curr_idx;
+
+        return g;
     }
 };
 

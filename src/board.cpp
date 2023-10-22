@@ -71,10 +71,9 @@ public:
                 break;
             }
 
-            if (board[i][j] == empty_square_marker) {
+            if (board[i][j] == empty_square_marker || i == 0 || j == 0) {
                 j++;
                 for (i++;!(Coord{i, j} == c); i++) {
-                    std::cout << i << " " << j << "\n";
                     board[i][j] = p2->piece;
                     p2->piece_count++;
                     p->piece_count--;
@@ -95,7 +94,7 @@ public:
                 break;
             }
 
-            if (board[i][j] == empty_square_marker) {
+            if (board[i][j] == empty_square_marker || i == 7 || j == 7) {
                 j--;
                 i--;
                 for (;!(Coord{i, j} == c); i--) {
@@ -120,7 +119,7 @@ public:
                 break;
             }
 
-            if (board[i][j] == empty_square_marker) {
+            if (board[i][j] == empty_square_marker || i == 0 || j == 8) {
                 j--;
                 for (i++;!(Coord{i, j} == c); i++) {
                     board[i][j] = p2->piece;
@@ -142,7 +141,7 @@ public:
                 break;
             }
 
-            if (board[i][j] == empty_square_marker) {
+            if (board[i][j] == empty_square_marker || i == 7 || j == 0) {
                 j++;
                 for (i--;!(Coord{i, j} == c); i--) {
                     board[i][j] = p2->piece;
@@ -165,7 +164,7 @@ public:
                 break;
             }
             
-            if(board[i][c.col] == empty_square_marker) {
+            if(board[i][c.col] == empty_square_marker || i == 0) {
                 for(i++; i < c.row; i ++) {
                     board[i][c.col] = p2->piece;
                     p2->piece_count++;
@@ -183,7 +182,7 @@ public:
                 break;
             }
             
-            if(board[i][c.col] == empty_square_marker) {
+            if(board[i][c.col] == empty_square_marker || i == 7) {
                 for(i--; i > c.row; i--) {
                     board[i][c.col] = p2->piece;
                     p2->piece_count++;
@@ -203,7 +202,7 @@ public:
                 break;
             }
 
-            if (board[c.row][i] == empty_square_marker) {
+            if (board[c.row][i] == empty_square_marker || i == 0) {
                 for(i++; i < c.col; i++) {
                     board[c.row][i] = p2->piece;
                     p2->piece_count++;
@@ -221,7 +220,7 @@ public:
                 break;
             }
 
-            if (board[c.row][i] == empty_square_marker) {
+            if (board[c.row][i] == empty_square_marker || i == 7) {
                 for(i--; i > c.col; i--) {
                     board[c.row][i] = p2->piece;
                     p2->piece_count++;

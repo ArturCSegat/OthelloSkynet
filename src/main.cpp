@@ -1,4 +1,4 @@
-#include "game.cpp"
+#include "gamereader.cpp"
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -9,6 +9,8 @@ int main() {
 
     Game g = Game(p1, p2, ' ');
 
+    GameReader gr;
+
     while(true) {
         g.board->display();
 
@@ -16,6 +18,15 @@ int main() {
         int i, j;
         scanf("%d %d", &i, &j);
 
-        g.play(Coord{i, j});
+        int fliped = g.play(Coord{i, j});
+        
+        if (fliped == 0) {
+            std::cout << "Must playa valid square, must flip at least 1 piecez\n";
+            continue;
+        }
+        
+        g.board->display();
+
+        gr.playBestMove(&g);
     }
 }
