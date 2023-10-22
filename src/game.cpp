@@ -26,10 +26,18 @@ public:
     }
 
     void play(Coord c) {
+
+        int old = players[0]->piece_count;
+
         board->playVertical(c, players[curr_idx], players[!curr_idx]);
         board->playHorizontal(c, players[curr_idx], players[!curr_idx]);
         board->playDiegonalLR(c, players[curr_idx], players[!curr_idx]);
         board->playDiegonalRL(c, players[curr_idx], players[!curr_idx]);
+
+        if (players[0]->piece_count == old) {
+            std::cout << "\n Invalid move, must flip at least 1 piece \n\n";
+            return;
+        }
 
         (*board)[c] = players[curr_idx]->piece;
         curr_idx = !curr_idx;
