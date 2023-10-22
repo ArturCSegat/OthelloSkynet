@@ -25,7 +25,7 @@ public:
             }
         }
 
-        int best_move_count = moves.rbegin()->first;
+        int best_move_count = moves.begin()->first;
 
         std::cout << "\n playing " << moves[best_move_count].row << " " << moves[best_move_count].col << "\n";
         sleep(1);
