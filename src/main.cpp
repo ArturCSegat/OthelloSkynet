@@ -1,15 +1,10 @@
-#include "gamereader.cpp"
-#include <cstdio>
-#include <iostream>
-#include <vector>
+#include "game.cpp"
 
 int main() {
     Player * p1 = new Player('o');
     Player * p2 = new Player('x');
 
     Game g = Game(p1, p2, ' ');
-
-    GameReader gr;
 
     while(true) {
         g.board->display();
@@ -27,6 +22,6 @@ int main() {
         
         g.board->display();
 
-        gr.playBestMove(&g);
+        g.playBestMove();
     }
 }

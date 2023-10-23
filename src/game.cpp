@@ -1,8 +1,9 @@
-#include <cstddef>
-#include <cstdio>
-#include <vector>
-#include <iostream>
 #include "board.cpp"
+#include <cmath>
+#include <map>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
 
 
 class Game{
@@ -21,12 +22,19 @@ public:
 
         players[0] = player1;
         players[1] = player2;
-
+        
         curr_idx = 0;
     }
 
     int play(Coord c) {
         
+        Coord pass = Coord{-1, -1};
+
+        if (c == pass) {
+            curr_idx = !curr_idx;
+            return -1;
+        }
+
         if ((*board)[c] != board->empty_square_marker) {
             // std::cout << "\n Invalid move, square already occupied. played by " << players[curr_idx]->piece << "\n\n";
             return 0;
@@ -56,7 +64,7 @@ public:
         p2->piece_count = players[1]->piece_count;
         char df = board->empty_square_marker;
 
-        Game g =  Game(p1, p2, df);
+        Game g = Game(p1, p2, df);
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -68,5 +76,24 @@ public:
 
         return g;
     }
+
+    void playBestMove() {
+        std::map<int, Coord> moves;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                int r = this->clone().play(Coord{i, j}); 
+                if (r == 0) {
+                    continue;
+                }
+                moves[r] = Coord{i, j};
+            }
+        }
+
+        Coord best_move = moves[moves.rbegin()->first];
+        std::cout << "\n playing " << best_move.toString() << "\n";
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        this->play(best_move);
+    }
+
 };
 

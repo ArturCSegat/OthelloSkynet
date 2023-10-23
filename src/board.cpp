@@ -1,6 +1,6 @@
-#include <cstdio>
-#include <vector>
+#include <cstdlib>
 #include <iostream>
+#include <string>
 #include "player.cpp"
 
 class Coord {
@@ -8,19 +8,16 @@ public:
     int row;
     int col;
 
-    std::string string() {
+    std::string toString() const {
         std::string r = std::string(3, 0);
         std::sprintf(&(r[0]), "%d", row);
         r[1] = ':';
         std::sprintf(&(r[2]), "%d", col);
         return r;
     }
-    
-    bool operator==(Coord const& c) {
-        if (c.row == row && c.col == col) {
-            return true;
-        }
-        return false;
+
+    bool operator==(const Coord& c) const {
+        return (c.row == row) && (c.col == col);
     }
 };
 
