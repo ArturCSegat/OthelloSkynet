@@ -1,6 +1,4 @@
-#include <cstdlib>
 #include <iostream>
-#include <string>
 #include "player.cpp"
 
 class Coord {
@@ -62,9 +60,12 @@ public:
     }
     
     void playDiegonalLR(Coord c, Player * p, Player * p2) {
+        int flip = 0;
         int j = c.col - 1;
         for(int i = c.row - 1; i >= 0 && j >= 0; i--) {
             if (board[i][j] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
 
@@ -72,22 +73,22 @@ public:
                 j++;
                 for (i++;!(Coord{i, j} == c); i++) {
                     board[i][j] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                     j++;
                 } 
                 break;
             }
 
-            p->piece_count += 1;
-            p2->piece_count--;
+            flip += 1;
             board[i][j] = p->piece;
             j--;
         }
-
+    
+        flip = 0;
         j = c.col + 1;
         for(int i = c.row + 1; i < 8 && j < 8; i++) {
             if (board[i][j] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
 
@@ -96,45 +97,47 @@ public:
                 i--;
                 for (;!(Coord{i, j} == c); i--) {
                     board[i][j] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                     j--;
                 } 
                 break;
             }
 
-            p->piece_count += 1;
+            flip += 1;
             board[i][j] = p->piece;
             j++;
         }
     }
     
     void playDiegonalRL(Coord c, Player * p, Player * p2) {
+        int flip = 0;
         int j = c.col + 1;
         for(int i = c.row - 1; i >= 0 && j < 8; i--) {
             if (board[i][j] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
 
-            if (board[i][j] == empty_square_marker || i == 0 || j == 8) {
+            if (board[i][j] == empty_square_marker || i == 0 || j == 7) {
                 j--;
                 for (i++;!(Coord{i, j} == c); i++) {
                     board[i][j] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                     j--;
                 } 
                 break;
             }
 
-            p->piece_count += 1;
+            flip += 1;
             board[i][j] = p->piece;
             j++;
         }
 
+        flip = 0;
         j = c.col - 1;
         for(int i = c.row + 1; i < 8 && j >= 0; i++) {
             if (board[i][j] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
 
@@ -142,92 +145,95 @@ public:
                 j++;
                 for (i--;!(Coord{i, j} == c); i--) {
                     board[i][j] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                     j++;
                 } 
                 break;
             }
 
-            p->piece_count += 1;
+            flip += 1;
             board[i][j] = p->piece;
             j--;
         }
     }
 
     void playVertical(Coord c, Player * p, Player * p2) {
+        int flip = 0;
+
         for (int i = c.row - 1; i >= 0; i--) {
             if (board[i][c.col] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
             
             if(board[i][c.col] == empty_square_marker || i == 0) {
                 for(i++; i < c.row; i ++) {
                     board[i][c.col] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                 }
                 break;
             }
 
-            p->piece_count += 1;
+            flip += 1;
             board[i][c.col] = p->piece;
         }
 
+        flip = 0;
         for (int i = c.row + 1; i < 8; i++) {
             if (board[i][c.col] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
             
             if(board[i][c.col] == empty_square_marker || i == 7) {
                 for(i--; i > c.row; i--) {
                     board[i][c.col] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                 }
                 break;
             }
 
+            flip += 1;
             board[i][c.col] = p->piece;
-            p->piece_count += 1;
         }
     }
 
     void playHorizontal(Coord c, Player * p, Player * p2) {
+        int flip = 0;
         for (int i = c.col - 1; i >= 0; i--) {
             if (board[c.row][i] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
 
             if (board[c.row][i] == empty_square_marker || i == 0) {
                 for(i++; i < c.col; i++) {
                     board[c.row][i] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                 }
                 break;
             }
 
+            flip += 1;
             board[c.row][i] = p->piece;
-            p->piece_count += 1;
         }
 
+        flip = 0;
         for (int i = c.col + 1; i < 8; i++) {
             if (board[c.row][i] == p->piece) {
+                p->piece_count += flip;
+                p2->piece_count -= flip;
                 break;
             }
 
             if (board[c.row][i] == empty_square_marker || i == 7) {
                 for(i--; i > c.col; i--) {
                     board[c.row][i] = p2->piece;
-                    p2->piece_count++;
-                    p->piece_count--;
                 }
                 break;
             }
 
+            flip += 1;
             board[c.row][i] = p->piece;
-            p->piece_count += 1;
         }
     }
 };
