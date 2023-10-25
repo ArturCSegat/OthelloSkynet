@@ -63,8 +63,7 @@ public:
         players[curr_idx]->piece_count++;
         curr_idx = !curr_idx;
         
-        if (players[!curr_idx]->piece_count + players[curr_idx]->piece_count == 64) {
-            this->endGame();
+        if (players[0]->piece_count + players[1]->piece_count == 64) {
             return -2;
         }
 

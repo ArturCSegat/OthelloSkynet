@@ -11,9 +11,11 @@ int main() {
         g.board->display();
         g.printPlayerInfo();
 
-        std::cout << "enter thee coords, player: " << g.players[g.curr_idx]->piece << "\n";
-        int i, j;
-        scanf("%d %d", &i, &j);
+        // std::cout << "enter thee coords, player: " << g.players[g.curr_idx]->piece << "\n";
+        // int i, j;
+        // scanf("%d %d", &i, &j);
+        int i = -2;
+        int j = -2;
         
         int fliped;
 
@@ -24,6 +26,8 @@ int main() {
         }
 
         if (fliped == -2) {
+            g.board->display();
+            g.endGame();
             break;
         }
         
@@ -36,5 +40,11 @@ int main() {
         g.printPlayerInfo();
 
         int over = g.playBestMove();
+
+        if (over == -2) {
+            g.board->display();
+            g.endGame();
+            break;
+        }
     }
 }
