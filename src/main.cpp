@@ -2,8 +2,8 @@
 #include <iostream>
 
 int main() {
-    Player * p1 = new Player('o');
-    Player * p2 = new Player('x');
+    std::shared_ptr<Player> p1 = std::make_shared<Player>(Player('o'));
+    std::shared_ptr<Player> p2 = std::make_shared<Player>(Player('x'));
 
     Game g = Game(p1, p2, ' ');
 
@@ -11,9 +11,11 @@ int main() {
         g.board->display();
         g.printPlayerInfo();
 
-        std::cout << "enter thee coords, player: " << g.players[g.curr_idx]->piece << "\n";
-        int i, j;
-        scanf("%d %d", &i, &j);
+        // std::cout << "enter thee coords, player: " << g.players[g.curr_idx]->piece << "\n";
+        // int i, j;
+        // scanf("%d %d", &i, &j);
+        int i = -2;
+        int j = -2;
         
         int fliped;
 

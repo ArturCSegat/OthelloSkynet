@@ -8,13 +8,13 @@
 
 class Game{
 public:
-    Board * board;
-    Player * players[2];
+    std::unique_ptr<Board> board;
+    std::shared_ptr<Player> players[2];
     int curr_idx;
     bool running;
     
-    Game(Player * player1, Player * player2, char default_square) {
-        board = new Board(default_square);
+    Game(std::shared_ptr<Player> player1, std::shared_ptr<Player> player2, char default_square) {
+        board = std::make_unique<Board>(Board(default_square));
 
         (*board)[Coord{3, 4}] = player1->piece;
         (*board)[Coord{4, 3}] = player1->piece;
@@ -23,8 +23,8 @@ public:
         player1->piece_count += 2;
         player2->piece_count += 2;
 
-        players[0] = player1;
-        players[1] = player2;
+        players[0] = std::move(player1);
+        players[1] = std::move(player2);
         
         curr_idx = 0;
         running = true;
@@ -71,9 +71,9 @@ public:
     }
 
     std::unique_ptr<Game> clone() {
-        Player * p1 = new Player(players[0]->piece);
+        std::shared_ptr<Player> p1 = std::make_shared<Player>(Player(players[0]->piece));
         p1->piece_count = players[0]->piece_count;
-        Player * p2 = new Player(players[1]->piece);
+        std::shared_ptr<Player> p2 =  std::make_shared<Player>(Player(players[1]->piece));
         p2->piece_count = players[1]->piece_count;
         char df = board->empty_square_marker;
 
@@ -120,7 +120,7 @@ public:
     void endGame() {
         printPlayerInfo();
 
-        Player * winner;
+        std::shared_ptr<Player> winner;
         if (players[0]->piece_count > players[1]->piece_count) {
             winner = players[0];
         } else if (players[0]->piece_count == players[1]->piece_count) {

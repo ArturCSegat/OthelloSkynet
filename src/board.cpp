@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "player.cpp"
 
 class Coord {
@@ -59,7 +60,7 @@ public:
         std::cout << "\n";
     }
     
-    void playDiegonalLR(Coord c, Player * p, Player * p2) {
+    void playDiegonalLR(Coord c, std::shared_ptr<Player> p, std::shared_ptr<Player> p2) {
         int flip = 0;
         int j = c.col - 1;
         for(int i = c.row - 1; i >= 0 && j >= 0; i--) {
@@ -108,7 +109,7 @@ public:
         }
     }
     
-    void playDiegonalRL(Coord c, Player * p, Player * p2) {
+    void playDiegonalRL(Coord c, std::shared_ptr<Player> p, std::shared_ptr<Player> p2) {
         int flip = 0;
         int j = c.col + 1;
         for(int i = c.row - 1; i >= 0 && j < 8; i--) {
@@ -156,7 +157,7 @@ public:
         }
     }
 
-    void playVertical(Coord c, Player * p, Player * p2) {
+    void playVertical(Coord c, std::shared_ptr<Player> p, std::shared_ptr<Player> p2) {
         int flip = 0;
 
         for (int i = c.row - 1; i >= 0; i--) {
@@ -197,7 +198,7 @@ public:
         }
     }
 
-    void playHorizontal(Coord c, Player * p, Player * p2) {
+    void playHorizontal(Coord c, std::shared_ptr<Player> p, std::shared_ptr<Player> p2) {
         int flip = 0;
         for (int i = c.col - 1; i >= 0; i--) {
             if (board[c.row][i] == p->piece) {
