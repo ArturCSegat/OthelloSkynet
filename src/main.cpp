@@ -11,11 +11,11 @@ int main() {
         g.board->display();
         g.printPlayerInfo();
 
-        // std::cout << "enter thee coords, player: " << g.players[g.curr_idx]->piece << "\n";
-        // int i, j;
-        // scanf("%d %d", &i, &j);
-        int i = -2;
-        int j = -2;
+        std::cout << "enter thee coords, player: " << g.players[g.curr_idx]->piece << "\n";
+        int i, j;
+        scanf("%d %d", &i, &j);
+        // int i = -2;
+        // int j = -2;
         
         int fliped;
 

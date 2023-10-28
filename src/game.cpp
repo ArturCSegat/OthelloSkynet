@@ -23,8 +23,8 @@ public:
         player1->piece_count += 2;
         player2->piece_count += 2;
 
-        players[0] = std::move(player1);
-        players[1] = std::move(player2);
+        players[0] = player1;
+        players[1] = player2;
         
         curr_idx = 0;
         running = true;
