@@ -1,33 +1,27 @@
-#include "game.cpp"
+#include "../includes/game.h"
+#include "../includes/cpuplayer.h"
 #include <iostream>
+#include <memory>
 
 int main() {
-    std::shared_ptr<Player> p1 = std::make_shared<Player>(Player('o'));
-    std::shared_ptr<Player> p2 = std::make_shared<Player>(Player('x'));
+    std::unique_ptr<Player> p1 = std::make_unique<Player>(Player('o'));
+    std::unique_ptr<CpuPlayer> p2 = std::make_unique<CpuPlayer>(CpuPlayer('x'));
 
-    Game g = Game(p1, p2, ' ');
+    std::unique_ptr<Game> g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), ' '));
 
-    while(g.running) {
-        g.board->display();
-        g.printPlayerInfo();
-
-        std::cout << "enter thee coords, player: " << g.players[g.curr_idx]->piece << "\n";
-        int i, j;
-        scanf("%d %d", &i, &j);
-        // int i = -2;
-        // int j = -2;
+    while(g->running) {
+        g->board->display();
+        g->printPlayerInfo();
         
+        Coord move = g->players[g->curr_idx]->choseSquare();
+
         int fliped;
 
-        if (Coord{i, j} == Coord{-2, -2}) {
-            fliped = g.playBestMove();
-        } else {
-            fliped = g.play(Coord{i, j});
-        }
+        fliped = g->play(move);
 
         if (fliped == -2) {
-            g.board->display();
-            g.endGame();
+            g->board->display();
+            g->endGame();
             break;
         }
         
@@ -36,14 +30,15 @@ int main() {
             continue;
         }
         
-        g.board->display();
-        g.printPlayerInfo();
+        g->board->display();
+        g->printPlayerInfo();
 
-        int over = g.playBestMove();
+        Coord cpu_move = p2->choseSquare(g);
+        int over = g->play(cpu_move);
 
         if (over == -2) {
-            g.board->display();
-            g.endGame();
+            g->board->display();
+            g->endGame();
             break;
         }
     }
