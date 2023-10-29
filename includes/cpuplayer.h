@@ -10,7 +10,7 @@ public:
 
     CpuPlayer(char p);
     
-    Coord choseSquare(const std::unique_ptr<Game>& game);
+    Coord choseSquare(const std::unique_ptr<Game>& game) override;
 };
 
 #endif

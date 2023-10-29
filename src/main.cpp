@@ -13,7 +13,7 @@ int main() {
         g->board->display();
         g->printPlayerInfo();
         
-        Coord move = g->players[g->curr_idx]->choseSquare();
+        Coord move = g->players[g->curr_idx]->choseSquare(g);
 
         int fliped;
 
@@ -33,7 +33,7 @@ int main() {
         g->board->display();
         g->printPlayerInfo();
 
-        Coord cpu_move = p2->choseSquare(g);
+        Coord cpu_move = g->players[g->curr_idx]->choseSquare(g);
         int over = g->play(cpu_move);
 
         if (over == -2) {

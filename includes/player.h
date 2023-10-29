@@ -4,6 +4,8 @@
 #include "coord.h"
 #include <memory>
 
+class Game;
+
 class Player {
 public:
     char piece;
@@ -11,7 +13,7 @@ public:
 
     Player(char p);
 
-    virtual Coord choseSquare();
+    virtual Coord choseSquare(const std::unique_ptr<Game>& game);
 };
 
 #endif

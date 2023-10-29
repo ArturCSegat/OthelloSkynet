@@ -14,5 +14,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 # Define the executable
-add_executable(Skinet ${MAIN_SOURCES} ${MODULE_SOURCES})
+add_executable(Skynet ${MAIN_SOURCES} ${MODULE_SOURCES})
 
