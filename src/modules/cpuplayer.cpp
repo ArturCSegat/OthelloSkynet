@@ -1,5 +1,5 @@
-#include "../../includes/game.h"
 #include "../../includes/cpuplayer.h"
+#include "../../includes/game.h"
 #include <map>
 #include <memory>
 #include <iostream>
@@ -8,10 +8,27 @@
 
 
 CpuPlayer::CpuPlayer(char p): Player(p){
-    for (int i = 0; i < 8; i++) {
-        aval_rows[i] = (float)i;
-        aval_cols[i] = (float)i;
-    }
+    // extremidades tem valor 2
+    // casas que precedem uma extremidade tem valor 0.5 pois possibilitam ao adversário acessar a extremidade
+    // centro tem valor aumentado
+
+    aval_rows[0] = 2;
+    aval_rows[1] = 0.5;
+    aval_rows[2] = 1;
+    aval_rows[3] = 1.5;
+    aval_rows[4] = 1.5;
+    aval_rows[5] = 1;
+    aval_rows[6] = 0.5;
+    aval_rows[7] = 2;
+
+    aval_cols[0] = 2;
+    aval_cols[1] = 0.5;
+    aval_cols[2] = 1;
+    aval_cols[3] = 1.5;
+    aval_cols[4] = 1.5;
+    aval_cols[5] = 1;
+    aval_cols[6] = 0.5;
+    aval_cols[7] = 2;
 }
 
 Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
@@ -21,11 +38,16 @@ Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
             if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker) {
                 continue;
             }
-            int r = game->clone()->play(Coord{i, j}); 
-            if (r == 0) {
+            int flipped = game->clone()->play(Coord{i, j}); 
+            if (flipped == 0) {
                 continue;
             }
-            moves[r] = Coord{i, j};
+            
+            int fit = (aval_rows[i] * aval_cols[j]) * ((float)flipped / piece_count);
+    // fit =   (val linha   +  valor coluna) * (quantas peças a jogada flipa / quantas peças o jogador tem antes de jogar)
+
+            
+            moves[fit] = Coord{i, j};
         }
     }
 

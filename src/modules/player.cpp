@@ -9,6 +9,7 @@ Player::Player(char p) {
     piece_count = 0;
 }
 
+// in this class the game parameter is useless, only required by the CpuPlayer sub-class
 Coord Player::choseSquare(const std::unique_ptr<Game>& game) {
     std::cout << "enter thee coords, player: " << piece << "\n";
     int i, j;

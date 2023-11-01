@@ -52,7 +52,7 @@ int Game::play(Coord c) {
     players[curr_idx]->piece_count++;
     curr_idx = !curr_idx;
 
-    if (players[0]->piece_count + players[1]->piece_count == 64) {
+    if (players[0]->piece_count + players[1]->piece_count == 64 || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
         return -2;
     }
 

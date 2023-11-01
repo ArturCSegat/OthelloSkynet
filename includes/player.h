@@ -4,6 +4,7 @@
 #include "coord.h"
 #include <memory>
 
+// just here so the linker wont die
 class Game;
 
 class Player {
