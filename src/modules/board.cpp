@@ -1,5 +1,6 @@
 #include <memory>
 #include <iostream>
+#include <vector>
 #include "../../includes/player.h"
 #include "../../includes/board.h"
 
@@ -38,36 +39,31 @@ void Board::display() {
     std::cout << "\n";
 }
     
-void Board::playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2) {
-    int flip = 0;
+void Board::playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
     int j = c.col - 1;
     for(int i = c.row - 1; i >= 0 && j >= 0; i--) {
         if (board[i][j] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
         if (board[i][j] == empty_square_marker || i == 0 || j == 0) {
             j++;
             for (i++;!(Coord{i, j} == c); i++) {
-                board[i][j] = p2->piece;
+                // board[i][j] = p2->piece;
+                fill.pop_back();
                 j++;
             } 
             break;
         }
 
-        flip += 1;
-        board[i][j] = p->piece;
+        // board[i][j] = p->piece;
+        fill.push_back(Coord{i, j});
         j--;
     }
 
-    flip = 0;
     j = c.col + 1;
     for(int i = c.row + 1; i < 8 && j < 8; i++) {
         if (board[i][j] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
@@ -75,143 +71,119 @@ void Board::playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<
             j--;
             i--;
             for (;!(Coord{i, j} == c); i--) {
-                board[i][j] = p2->piece;
+                // board[i][j] = p2->piece;
+                fill.pop_back();
                 j--;
             } 
             break;
         }
 
-        flip += 1;
-        board[i][j] = p->piece;
+        // board[i][j] = p->piece;
+        fill.push_back(Coord{i, j});
         j++;
     }
 }
     
-void Board::playDiegonalRL(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2) {
-    int flip = 0;
+void Board::playDiegonalRL(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
     int j = c.col + 1;
     for(int i = c.row - 1; i >= 0 && j < 8; i--) {
         if (board[i][j] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
         if (board[i][j] == empty_square_marker || i == 0 || j == 7) {
             j--;
             for (i++;!(Coord{i, j} == c); i++) {
-                board[i][j] = p2->piece;
+                fill.pop_back();
                 j--;
             } 
             break;
         }
 
-        flip += 1;
-        board[i][j] = p->piece;
+        fill.push_back(Coord{i, j});
         j++;
     }
 
-    flip = 0;
     j = c.col - 1;
     for(int i = c.row + 1; i < 8 && j >= 0; i++) {
         if (board[i][j] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
         if (board[i][j] == empty_square_marker || i == 7 || j == 0) {
             j++;
             for (i--;!(Coord{i, j} == c); i--) {
-                board[i][j] = p2->piece;
+                fill.pop_back();
                 j++;
             } 
             break;
         }
 
-        flip += 1;
-        board[i][j] = p->piece;
+        fill.push_back(Coord{i, j});
         j--;
     }
 }
 
-void Board::playVertical(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2) {
-    int flip = 0;
-
+void Board::playVertical(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
     for (int i = c.row - 1; i >= 0; i--) {
         if (board[i][c.col] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
         if(board[i][c.col] == empty_square_marker || i == 0) {
             for(i++; i < c.row; i ++) {
-                board[i][c.col] = p2->piece;
+                fill.pop_back();
             }
             break;
         }
 
-        flip += 1;
-        board[i][c.col] = p->piece;
+        fill.push_back(Coord{i, c.col});
     }
 
-    flip = 0;
     for (int i = c.row + 1; i < 8; i++) {
         if (board[i][c.col] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
         if(board[i][c.col] == empty_square_marker || i == 7) {
             for(i--; i > c.row; i--) {
-                board[i][c.col] = p2->piece;
+                fill.pop_back();
             }
             break;
         }
 
-        flip += 1;
-        board[i][c.col] = p->piece;
+        fill.push_back(Coord{i, c.col});
     }
 }
 
-void Board::playHorizontal(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2) {
-    int flip = 0;
+void Board::playHorizontal(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
     for (int i = c.col - 1; i >= 0; i--) {
         if (board[c.row][i] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
         if (board[c.row][i] == empty_square_marker || i == 0) {
             for(i++; i < c.col; i++) {
-                board[c.row][i] = p2->piece;
+                fill.pop_back();
             }
             break;
         }
 
-        flip += 1;
-        board[c.row][i] = p->piece;
+        fill.push_back(Coord{c.row, i});
     }
 
-    flip = 0;
     for (int i = c.col + 1; i < 8; i++) {
         if (board[c.row][i] == p->piece) {
-            p->piece_count += flip;
-            p2->piece_count -= flip;
             break;
         }
 
         if (board[c.row][i] == empty_square_marker || i == 7) {
             for(i--; i > c.col; i--) {
-                board[c.row][i] = p2->piece;
+                fill.pop_back();
             }
             break;
         }
 
-        flip += 1;
-        board[c.row][i] = p->piece;
+        fill.push_back(Coord{c.row, i});
     }
 }

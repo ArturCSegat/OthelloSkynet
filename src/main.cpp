@@ -3,6 +3,10 @@
 #include <iostream>
 #include <memory>
 
+bool skip_1 = false;
+bool skip_2 = false;
+
+
 int main() {
     std::unique_ptr<Player> p1 = std::make_unique<Player>(Player('o'));
     std::unique_ptr<CpuPlayer> p2 = std::make_unique<CpuPlayer>(CpuPlayer('x'));
@@ -14,6 +18,8 @@ int main() {
         g->printPlayerInfo();
         
         Coord move = g->players[g->curr_idx]->choseSquare(g);
+
+        skip_1 = move == Coord{-1, -1};
 
         int fliped;
 
@@ -34,9 +40,17 @@ int main() {
         g->printPlayerInfo();
 
         Coord cpu_move = g->players[g->curr_idx]->choseSquare(g);
+
+        skip_2 = cpu_move == Coord{-1, -1};
+
         int over = g->play(cpu_move);
 
-        if (over == -2) {
+        if (skip_1 && skip_2) {
+            std::cout << "both skkipped end game\n";
+            break;
+        }
+
+        if (over == -2 ) {
             g->board->display();
             g->endGame();
             break;

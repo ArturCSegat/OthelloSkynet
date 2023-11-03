@@ -4,6 +4,7 @@
 #include "coord.h"
 #include "player.h"
 #include <memory>
+#include <vector>
 
 class Board {
 public:
@@ -14,10 +15,10 @@ public:
     char& operator[] (Coord c);
     void display();
     
-    void playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2);
-    void playDiegonalRL(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2);
-    void playVertical(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2);
-    void playHorizontal(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2);
+    void playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
+    void playDiegonalRL(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
+    void playVertical(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
+    void playHorizontal(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
 };
 
 #endif

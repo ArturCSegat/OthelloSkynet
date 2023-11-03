@@ -1,6 +1,7 @@
 #include "../../includes/board.h"
 #include "../../includes/game.h"
 #include <iostream>
+#include <vector>
 
 Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square) {
     board = std::make_unique<Board>(Board(default_square));
@@ -17,6 +18,18 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
 
     curr_idx = 0;
     running = true;
+}
+
+std::vector<Coord> Game::flipedFromMove(Coord move) {
+    std::vector<Coord> fill;
+    fill.reserve(24);
+
+    board->playVertical(move, players[curr_idx], players[!curr_idx], fill);
+    board->playHorizontal(move, players[curr_idx], players[!curr_idx], fill);
+    board->playDiegonalLR(move, players[curr_idx], players[!curr_idx], fill);
+    board->playDiegonalRL(move, players[curr_idx], players[!curr_idx], fill);
+    
+    return fill;
 }
 
 int Game::play(Coord c) {
@@ -36,27 +49,26 @@ int Game::play(Coord c) {
         return 0;
     }
 
-    int old = players[curr_idx]->piece_count;
+    std::vector<Coord> to_flip = flipedFromMove(c);
 
-    board->playVertical(c, players[curr_idx], players[!curr_idx]);
-    board->playHorizontal(c, players[curr_idx], players[!curr_idx]);
-    board->playDiegonalLR(c, players[curr_idx], players[!curr_idx]);
-    board->playDiegonalRL(c, players[curr_idx], players[!curr_idx]);
-
-    if (players[curr_idx]->piece_count == old) {
-        // std::cout << "\n Invalid move, must flip at least 1 piece. played by " << players[curr_idx]->piece << "\n\n";
+    if (to_flip.size() == 0) {
         return 0;
     }
 
+    for (int i = 0; i < to_flip.size(); i++) {
+        (*board)[to_flip[i]] = players[curr_idx]->piece;
+    }
+
     (*board)[c] = players[curr_idx]->piece;
-    players[curr_idx]->piece_count++;
+    players[!curr_idx]->piece_count -= to_flip.size();
+    players[curr_idx]->piece_count += to_flip.size() + 1;
     curr_idx = !curr_idx;
 
     if (players[0]->piece_count + players[1]->piece_count == 64 || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
         return -2;
     }
 
-    return players[!curr_idx]->piece_count - old;
+    return to_flip.size();
 }
 
 std::unique_ptr<Game> Game::clone() {

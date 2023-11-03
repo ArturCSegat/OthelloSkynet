@@ -6,6 +6,36 @@
 #include <thread>
 #include <chrono>
 
+BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
+
+Coord BadCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
+    std::map<int, Coord> moves;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker) {
+                continue;
+            }
+            int flipped = game->flipedFromMove(Coord{i, j}).size(); 
+            if (flipped == 0) {
+                continue;
+            }
+            
+            moves[flipped] = Coord{i, j};
+        }
+    }
+
+    if (moves.empty()) {
+        std::cout << "Skipping my turn\n";
+        return Coord{-1, -1};
+    }
+
+    Coord best_move = moves[moves.rbegin()->first];
+
+    std::cout << "Playing " << best_move.toString() << "\n";
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    return best_move;
+
+}
 
 CpuPlayer::CpuPlayer(char p): Player(p){
     // extremidades tem valor 2
@@ -38,7 +68,7 @@ Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
             if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker) {
                 continue;
             }
-            int flipped = game->clone()->play(Coord{i, j}); 
+            int flipped = game->flipedFromMove(Coord{i, j}).size(); 
             if (flipped == 0) {
                 continue;
             }
@@ -46,18 +76,27 @@ Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
             int fit = (aval_rows[i] * aval_cols[j]) * ((float)flipped / piece_count);
     // fit =   (val linha   +  valor coluna) * (quantas peças a jogada flipa / quantas peças o jogador tem antes de jogar)
 
-            
             moves[fit] = Coord{i, j};
         }
     }
 
     if (moves.empty()) {
+        std::cout << "Skipping my turn\n";
         return Coord{-1, -1};
     }
 
     Coord best_move = moves[moves.rbegin()->first];
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    std::cout << "Playing " << best_move.toString() << "\n";
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return best_move;
-
 }
+
+
+
+BetterCpuPlayer::BetterCpuPlayer(char p) : CpuPlayer(p) {};
+
+Coord BetterCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {}
+
+int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, const std::unique_ptr<Game>& game) {}
+
