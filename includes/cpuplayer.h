@@ -26,7 +26,7 @@ public:
     
     Coord choseSquare(const std::unique_ptr<Game>& game) override;
 private:
-    int avaliateMoveTillEnd(Coord move, const std::unique_ptr<Game>& game);
+    float avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game);
 };
 
 #endif

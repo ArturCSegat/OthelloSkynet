@@ -40,6 +40,7 @@ int Game::play(Coord c) {
     Coord pass = Coord{-1, -1};
 
     if (c == pass) {
+        players[curr_idx]->play_count++;
         curr_idx = !curr_idx;
         return -1;
     }
@@ -62,6 +63,7 @@ int Game::play(Coord c) {
     (*board)[c] = players[curr_idx]->piece;
     players[!curr_idx]->piece_count -= to_flip.size();
     players[curr_idx]->piece_count += to_flip.size() + 1;
+    players[curr_idx]->play_count++;
     curr_idx = !curr_idx;
 
     if (players[0]->piece_count + players[1]->piece_count == 64 || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
@@ -74,8 +76,10 @@ int Game::play(Coord c) {
 std::unique_ptr<Game> Game::clone() {
     std::unique_ptr<Player> p1 = std::make_unique<Player>(Player(players[0]->piece));
     p1->piece_count = players[0]->piece_count;
+    p1->play_count = players[0]->play_count;
     std::unique_ptr<Player> p2 =  std::make_unique<Player>(Player(players[1]->piece));
     p2->piece_count = players[1]->piece_count;
+    p2->play_count = players[1]->play_count;
     char df = board->empty_square_marker;
 
     std::unique_ptr<Game> g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), df));

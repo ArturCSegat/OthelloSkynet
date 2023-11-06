@@ -1,15 +1,15 @@
 #include "../includes/game.h"
 #include "../includes/cpuplayer.h"
+#include <algorithm>
 #include <iostream>
 #include <memory>
 
 bool skip_1 = false;
 bool skip_2 = false;
 
-
 int main() {
-    std::unique_ptr<Player> p1 = std::make_unique<Player>(Player('o'));
-    std::unique_ptr<CpuPlayer> p2 = std::make_unique<CpuPlayer>(CpuPlayer('x'));
+    std::unique_ptr<CpuPlayer> p1 = std::make_unique<CpuPlayer>(CpuPlayer('o'));
+    std::unique_ptr<BetterCpuPlayer> p2 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('x'));
 
     std::unique_ptr<Game> g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), ' '));
 
@@ -43,12 +43,12 @@ int main() {
 
         skip_2 = cpu_move == Coord{-1, -1};
 
-        int over = g->play(cpu_move);
-
-        if (skip_1 && skip_2) {
-            std::cout << "both skkipped end game\n";
+        if(skip_1 && skip_2) {
+            std::cout << "Both skipped, no more moves availabe\n";
             break;
         }
+
+        int over = g->play(cpu_move);
 
         if (over == -2 ) {
             g->board->display();

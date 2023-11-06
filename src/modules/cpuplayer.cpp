@@ -1,5 +1,7 @@
 #include "../../includes/cpuplayer.h"
 #include "../../includes/game.h"
+#include <cmath>
+#include <ctime>
 #include <map>
 #include <memory>
 #include <iostream>
@@ -62,10 +64,10 @@ CpuPlayer::CpuPlayer(char p): Player(p){
 }
 
 Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
-    std::map<int, Coord> moves;
+    std::map<float, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker) {
+            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker){
                 continue;
             }
             int flipped = game->flipedFromMove(Coord{i, j}).size(); 
@@ -73,10 +75,36 @@ Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
                 continue;
             }
             
-            int fit = (aval_rows[i] * aval_cols[j]) * ((float)flipped / piece_count);
-    // fit =   (val linha   +  valor coluna) * (quantas peças a jogada flipa / quantas peças o jogador tem antes de jogar)
+            float fit = std::pow((aval_rows[i] * aval_cols[j]), 2) + flipped;
 
             moves[fit] = Coord{i, j};
+        }
+    }
+
+    if (moves.empty()) {
+        return Coord{-1, -1};
+    }
+
+    Coord best_move = moves[moves.rbegin()->first];
+    return best_move;
+}
+
+
+
+BetterCpuPlayer::BetterCpuPlayer(char p) : CpuPlayer(p) {};
+
+Coord BetterCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
+    std::map<float, Coord> moves;
+    int c = 0;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker
+                    || game->flipedFromMove(Coord{i, j}).size() == 0){
+                continue;
+            }
+            float fit = avaliateMoveTillEnd(Coord{i, j}, std::move(game->clone()));
+            moves[fit] = Coord{i, j};
+            std::cout << "move: " << Coord{i, j}.toString() << " value: " << fit << "\n";
         }
     }
 
@@ -92,11 +120,26 @@ Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
     return best_move;
 }
 
+float BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game) {
+    game->play(move);
+    Coord sq;
+    do{
+        Coord tmp = CpuPlayer::choseSquare(game);
+        // not sure why but it eliminates bad sub-trees i guess;
+        if (tmp == sq) {
+            break;
+        }
+        sq = tmp;
+    }while(game->play(sq) != -2);
+
+    int this_idx = game->players[1]->piece == this->piece;
+
+    if (game->players[this_idx]->piece_count < game->players[!this_idx]->piece_count) {
+        return game->players[this_idx]->piece_count / (float)(play_count + 1);
+    }
+    
+    return game->players[this_idx]->play_count;
+}
 
 
-BetterCpuPlayer::BetterCpuPlayer(char p) : CpuPlayer(p) {};
-
-Coord BetterCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {}
-
-int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, const std::unique_ptr<Game>& game) {}
 

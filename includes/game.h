@@ -1,3 +1,4 @@
+#include "coord.h"
 #include <vector>
 #ifndef GAME_H
 
@@ -14,7 +15,7 @@ public:
     bool running;
 
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
-    
+
     std::vector<Coord> flipedFromMove(Coord move);
 
     int play(Coord c);
