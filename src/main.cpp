@@ -45,6 +45,7 @@ int main() {
 
         if(skip_1 && skip_2) {
             std::cout << "Both skipped, no more moves availabe\n";
+            g->endGame();
             break;
         }
 
