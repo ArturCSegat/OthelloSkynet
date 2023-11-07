@@ -6,6 +6,7 @@
 class BadCpuPlayer: public Player {
 public:
     BadCpuPlayer(char p);
+    ~BadCpuPlayer() override = default;
     
     Coord choseSquare(const std::unique_ptr<Game>& game) override;
 };
@@ -16,6 +17,7 @@ public:
     float aval_cols[8];
 
     CpuPlayer(char p);
+    ~CpuPlayer() override = default;
     
     Coord choseSquare(const std::unique_ptr<Game>& game) override;
 };
@@ -23,6 +25,7 @@ public:
 class BetterCpuPlayer : public CpuPlayer {
 public:
     BetterCpuPlayer(char p);
+    ~BetterCpuPlayer() override = default;
     
     Coord choseSquare(const std::unique_ptr<Game>& game) override;
 private:
