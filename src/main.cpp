@@ -4,14 +4,15 @@
 #include <iostream>
 #include <memory>
 
-bool skip_1 = false;
-bool skip_2 = false;
 
 int main() {
-    std::unique_ptr<CpuPlayer> p1 = std::make_unique<CpuPlayer>(CpuPlayer('o'));
-    std::unique_ptr<BetterCpuPlayer> p2 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('x'));
+    bool skip_1 = false;
+    bool skip_2 = false;
 
-    std::unique_ptr<Game> g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), ' '));
+    auto p1 = std::make_unique<CpuPlayer>(CpuPlayer('o'));
+    auto p2 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('x'));
+
+    auto g = std::make_unique<Game>(Game(std::move(p2), std::move(p1), ' '));
 
     while(g->running) {
         g->board->display();

@@ -56,8 +56,8 @@ int Game::play(Coord c) {
         return 0;
     }
 
-    for (int i = 0; i < to_flip.size(); i++) {
-        (*board)[to_flip[i]] = players[curr_idx]->piece;
+    for (const Coord &c: to_flip) {
+        (*board)[c] = players[curr_idx]->piece;
     }
 
     (*board)[c] = players[curr_idx]->piece;
@@ -74,15 +74,15 @@ int Game::play(Coord c) {
 }
 
 std::unique_ptr<Game> Game::clone() {
-    std::unique_ptr<Player> p1 = std::make_unique<Player>(Player(players[0]->piece));
+    auto p1 = std::make_unique<Player>(Player(players[0]->piece));
     p1->piece_count = players[0]->piece_count;
     p1->play_count = players[0]->play_count;
-    std::unique_ptr<Player> p2 =  std::make_unique<Player>(Player(players[1]->piece));
+    auto p2 =  std::make_unique<Player>(Player(players[1]->piece));
     p2->piece_count = players[1]->piece_count;
     p2->play_count = players[1]->play_count;
     char df = board->empty_square_marker;
 
-    std::unique_ptr<Game> g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), df));
+    auto g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), df));
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -98,21 +98,16 @@ std::unique_ptr<Game> Game::clone() {
 void Game::endGame() {
     printPlayerInfo();
 
-    std::unique_ptr<Player> * winner;
-    if (players[0]->piece_count > players[1]->piece_count) {
-        winner = &players[0];
-    } else if (players[0]->piece_count == players[1]->piece_count) {
-        winner = NULL;
-    } else {
-        winner = &players[1];
-    }
+    int winner_idx = players[1]->piece_count > players[0]->piece_count;
+    int reverse = players[0]->piece_count > players[1]->piece_count;
 
-    if (winner == NULL) {
+
+    if (winner_idx == reverse) {
         std::cout << "\n\n The Grame Drawed\n\n";
         return;
     }
 
-    std::cout << "\n\n The Winner of game " << this << " is " << (*winner)->piece << "\n\n";
+    std::cout << "\n\n The Winner of game " << this << " is " << players[winner_idx]->piece << "\n\n";
     running = false;
 }
 

@@ -102,15 +102,17 @@ Coord BetterCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
                     || game->flipedFromMove(Coord{i, j}).size() == 0){
                 continue;
             }
-            float fit = avaliateMoveTillEnd(Coord{i, j}, std::move(game->clone()));
-            moves[fit] = Coord{i, j};
-            std::cout << "move: " << Coord{i, j}.toString() << " value: " << fit << "\n";
+            moves[avaliateMoveTillEnd(Coord{i, j}, std::move(game->clone()))] = Coord{i, j};
         }
     }
 
     if (moves.empty()) {
         std::cout << "Skipping my turn\n";
         return Coord{-1, -1};
+    }
+    
+    for (const auto &[fit, move]: moves) {
+        std::cout << "move: " << move.toString() << " value: " << fit << "\n";
     }
 
     Coord best_move = moves[moves.rbegin()->first];
