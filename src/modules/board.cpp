@@ -4,6 +4,19 @@
 #include "../../includes/player.h"
 #include "../../includes/board.h"
 
+
+Board::Board() {
+    int count = 0;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            board[i][j] = ' ';
+            count++;
+        }
+    }
+
+    empty_square_marker = ' ';
+}
+
 Board::Board(char esm) {
     int count = 0;
     for (int i = 0; i < 8; i++) {
@@ -17,6 +30,10 @@ Board::Board(char esm) {
 }
     
 char& Board::operator[] (Coord c) {
+    return board[c.row][c.col];
+}
+
+char const& Board::operator[] (Coord c) const {
     return board[c.row][c.col];
 }
 
@@ -39,7 +56,7 @@ void Board::display() {
     std::cout << "\n";
 }
     
-void Board::playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
+void Board::playDiegonalLR(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const {
     int j = c.col - 1;
     for(int i = c.row - 1; i >= 0 && j >= 0; i--) {
         if (board[i][j] == p->piece) {
@@ -84,7 +101,7 @@ void Board::playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<
     }
 }
     
-void Board::playDiegonalRL(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
+void Board::playDiegonalRL(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const {
     int j = c.col + 1;
     for(int i = c.row - 1; i >= 0 && j < 8; i--) {
         if (board[i][j] == p->piece) {
@@ -124,7 +141,7 @@ void Board::playDiegonalRL(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<
     }
 }
 
-void Board::playVertical(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
+void Board::playVertical(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const {
     for (int i = c.row - 1; i >= 0; i--) {
         if (board[i][c.col] == p->piece) {
             break;
@@ -156,7 +173,7 @@ void Board::playVertical(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Pl
     }
 }
 
-void Board::playHorizontal(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill) {
+void Board::playHorizontal(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const {
     for (int i = c.col - 1; i >= 0; i--) {
         if (board[c.row][i] == p->piece) {
             break;

@@ -9,18 +9,18 @@
 #define GAME_H
 class Game {
 public:
-    std::unique_ptr<Board> board;
+    Board board;
     std::unique_ptr<Player> players[2];
     int curr_idx;
     bool running;
 
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
 
-    std::vector<Coord> flipedFromMove(Coord move);
+    std::vector<Coord> flipedFromMove(Coord move) const;
 
     int play(Coord c);
 
-    std::unique_ptr<Game> clone();
+    std::unique_ptr<Game> clone() const;
 
     void endGame();
 

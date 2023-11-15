@@ -10,15 +10,18 @@ class Board {
 public:
     char board[8][8];
     char empty_square_marker;
+
+    Board();
     Board(char esm);
 
     char& operator[] (Coord c);
+    char const& operator[] (Coord c) const;
     void display();
     
-    void playDiegonalLR(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
-    void playDiegonalRL(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
-    void playVertical(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
-    void playHorizontal(Coord c, std::unique_ptr<Player>& p, std::unique_ptr<Player>& p2, std::vector<Coord>& fill);
+    void playDiegonalLR(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
+    void playDiegonalRL(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
+    void playHorizontal(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
+    void playVertical(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
 };
 
 #endif

@@ -4,12 +4,10 @@
 #include <vector>
 
 Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square) {
-    board = std::make_unique<Board>(Board(default_square));
-
-    (*board)[Coord{3, 4}] = player1->piece;
-    (*board)[Coord{4, 3}] = player1->piece;
-    (*board)[Coord{3, 3}] = player2->piece;
-    (*board)[Coord{4, 4}] = player2->piece;
+    board[Coord{3, 4}] = player1->piece;
+    board[Coord{4, 3}] = player1->piece;
+    board[Coord{3, 3}] = player2->piece;
+    board[Coord{4, 4}] = player2->piece;
     player1->piece_count += 2;
     player2->piece_count += 2;
 
@@ -20,14 +18,14 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
     running = true;
 }
 
-std::vector<Coord> Game::flipedFromMove(Coord move) {
+std::vector<Coord> Game::flipedFromMove(Coord move) const{
     std::vector<Coord> fill;
     fill.reserve(24);
 
-    board->playVertical(move, players[curr_idx], players[!curr_idx], fill);
-    board->playHorizontal(move, players[curr_idx], players[!curr_idx], fill);
-    board->playDiegonalLR(move, players[curr_idx], players[!curr_idx], fill);
-    board->playDiegonalRL(move, players[curr_idx], players[!curr_idx], fill);
+    board.playVertical(move, players[curr_idx], players[!curr_idx], fill);
+    board.playHorizontal(move, players[curr_idx], players[!curr_idx], fill);
+    board.playDiegonalLR(move, players[curr_idx], players[!curr_idx], fill);
+    board.playDiegonalRL(move, players[curr_idx], players[!curr_idx], fill);
     
     return fill;
 }
@@ -45,7 +43,7 @@ int Game::play(Coord c) {
         return -1;
     }
 
-    if ((*board)[c] != board->empty_square_marker) {
+    if (board[c] != board.empty_square_marker) {
         // std::cout << "\n Invalid move, square already occupied. played by " << players[curr_idx]->piece << "\n\n";
         return 0;
     }
@@ -57,10 +55,10 @@ int Game::play(Coord c) {
     }
 
     for (const Coord &c: to_flip) {
-        (*board)[c] = players[curr_idx]->piece;
+        board[c] = players[curr_idx]->piece;
     }
 
-    (*board)[c] = players[curr_idx]->piece;
+    board[c] = players[curr_idx]->piece;
     players[!curr_idx]->piece_count -= to_flip.size();
     players[curr_idx]->piece_count += to_flip.size() + 1;
     players[curr_idx]->play_count++;
@@ -73,20 +71,20 @@ int Game::play(Coord c) {
     return to_flip.size();
 }
 
-std::unique_ptr<Game> Game::clone() {
+std::unique_ptr<Game> Game::clone() const{
     auto p1 = std::make_unique<Player>(Player(players[0]->piece));
     p1->piece_count = players[0]->piece_count;
     p1->play_count = players[0]->play_count;
     auto p2 =  std::make_unique<Player>(Player(players[1]->piece));
     p2->piece_count = players[1]->piece_count;
     p2->play_count = players[1]->play_count;
-    char df = board->empty_square_marker;
+    char df = board.empty_square_marker;
 
     auto g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), df));
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            g->board->board[i][j] = (*board)[Coord{i, j}];
+            g->board[Coord{i, j}] = board[Coord{i, j}];
         }
     }
 

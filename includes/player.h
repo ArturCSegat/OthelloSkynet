@@ -16,7 +16,7 @@ public:
     Player(char p);
     virtual ~Player() = default;
 
-    virtual Coord choseSquare(const std::unique_ptr<Game>& game);
+    virtual Coord choseSquare(const Game& game);
 };
 
 #endif

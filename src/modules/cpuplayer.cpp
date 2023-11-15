@@ -10,14 +10,14 @@
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
-Coord BadCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
+Coord BadCpuPlayer::choseSquare(const Game& game) {
     std::map<int, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker) {
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker) {
                 continue;
             }
-            int flipped = game->flipedFromMove(Coord{i, j}).size(); 
+            int flipped = game.flipedFromMove(Coord{i, j}).size(); 
             if (flipped == 0) {
                 continue;
             }
@@ -63,14 +63,14 @@ CpuPlayer::CpuPlayer(char p): Player(p){
     aval_cols[7] = 2;
 }
 
-Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
+Coord CpuPlayer::choseSquare(const Game& game) {
     std::map<float, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker){
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker){
                 continue;
             }
-            int flipped = game->flipedFromMove(Coord{i, j}).size(); 
+            int flipped = game.flipedFromMove(Coord{i, j}).size(); 
             if (flipped == 0) {
                 continue;
             }
@@ -93,16 +93,16 @@ Coord CpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
 
 BetterCpuPlayer::BetterCpuPlayer(char p) : CpuPlayer(p) {};
 
-Coord BetterCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
+Coord BetterCpuPlayer::choseSquare(const Game& game) {
     std::map<float, Coord> moves;
     int c = 0;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker
-                    || game->flipedFromMove(Coord{i, j}).size() == 0){
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}).size() == 0){
                 continue;
             }
-            moves[avaliateMoveTillEnd(Coord{i, j}, std::move(game->clone()))] = Coord{i, j};
+            moves[avaliateMoveTillEnd(Coord{i, j}, std::move(game.clone()))] = Coord{i, j};
         }
     }
 
@@ -126,7 +126,7 @@ float BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> gam
     game->play(move);
     Coord sq;
     do{
-        Coord tmp = CpuPlayer::choseSquare(game);
+        Coord tmp = CpuPlayer::choseSquare(*game);
         // not sure why but it eliminates bad sub-trees i guess;
         if (tmp == sq) {
             break;
@@ -147,15 +147,15 @@ float BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> gam
 
 MaybeEvenBetterCpuPlayer::MaybeEvenBetterCpuPlayer(char p) : BetterCpuPlayer(p) {};
 
-Coord MaybeEvenBetterCpuPlayer::choseSquare(const std::unique_ptr<Game>& game) {
+Coord MaybeEvenBetterCpuPlayer::choseSquare(const Game& game) {
     std::map<float, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if ((*game->board)[Coord{i, j}] != game->board->empty_square_marker
-                    || game->flipedFromMove(Coord{i, j}).size() == 0){
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}).size() == 0){
                 continue;
             }
-            moves[avaliateShallowTreeTillEnd(Coord{i, j}, game->clone())] = Coord{i, j};
+            moves[avaliateShallowTreeTillEnd(Coord{i, j}, game.clone())] = Coord{i, j};
         }
     }
 
@@ -181,7 +181,7 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     int winning_count = 0;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            if((*game->board)[Coord{i, j}] != game->board->empty_square_marker
+            if(game->board[Coord{i, j}] != game->board.empty_square_marker
                     || game->flipedFromMove(Coord{i, j}).size() == 0) {
                 continue;
             }

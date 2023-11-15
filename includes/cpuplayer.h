@@ -8,7 +8,7 @@ public:
     BadCpuPlayer(char p);
     ~BadCpuPlayer() override = default;
     
-    Coord choseSquare(const std::unique_ptr<Game>& game) override;
+    Coord choseSquare(const Game& game) override;
 };
 
 class CpuPlayer: public Player {
@@ -19,7 +19,7 @@ public:
     CpuPlayer(char p);
     ~CpuPlayer() override = default;
     
-    Coord choseSquare(const std::unique_ptr<Game>& game) override;
+    Coord choseSquare(const Game& game) override;
 };
 
 class BetterCpuPlayer : public CpuPlayer {
@@ -27,7 +27,7 @@ public:
     BetterCpuPlayer(char p);
     ~BetterCpuPlayer() override = default;
     
-    Coord choseSquare(const std::unique_ptr<Game>& game) override;
+    Coord choseSquare(const Game& game) override;
     float avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game);
 };
 
@@ -36,7 +36,7 @@ public:
     MaybeEvenBetterCpuPlayer(char p);
     ~MaybeEvenBetterCpuPlayer() override = default;
     
-    Coord choseSquare(const std::unique_ptr<Game>& game) override;
+    Coord choseSquare(const Game& game) override;
 private:
     int avaliateShallowTreeTillEnd(Coord move, std::unique_ptr<Game> game);
 };
