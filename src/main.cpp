@@ -6,21 +6,16 @@
 
 
 int main() {
-    bool skip_1 = false;
-    bool skip_2 = false;
-
     auto p1 = std::make_unique<CpuPlayer>(CpuPlayer('o'));
-    auto p2 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('x'));
+    auto p2 = std::make_unique<MaybeEvenBetterCpuPlayer>(MaybeEvenBetterCpuPlayer('x'));
 
-    auto g = std::make_unique<Game>(Game(std::move(p2), std::move(p1), ' '));
+    auto g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), ' '));
 
     while(g->running) {
         g->board->display();
         g->printPlayerInfo();
         
         Coord move = g->players[g->curr_idx]->choseSquare(g);
-
-        skip_1 = move == Coord{-1, -1};
 
         int fliped;
 
@@ -42,9 +37,7 @@ int main() {
 
         Coord cpu_move = g->players[g->curr_idx]->choseSquare(g);
 
-        skip_2 = cpu_move == Coord{-1, -1};
-
-        if(skip_1 && skip_2) {
+        if(cpu_move == move) {
             std::cout << "Both skipped, no more moves availabe\n";
             g->endGame();
             break;
