@@ -3,12 +3,14 @@
 
 #include "coord.h"
 #include "player.h"
+#include <array>
 #include <memory>
 #include <vector>
 
 class Board {
 public:
-    char board[8][8];
+    // char board[8][8];
+    std::array<std::array<char, 8>, 8> board;
     char empty_square_marker;
 
     Board();

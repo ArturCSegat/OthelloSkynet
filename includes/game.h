@@ -1,7 +1,7 @@
-#include "coord.h"
-#include <vector>
 #ifndef GAME_H
 
+#include "coord.h"
+#include <vector>
 #include "board.h"
 #include "player.h"
 #include <memory>

@@ -1,54 +1,48 @@
 #include "../includes/game.h"
 #include "../includes/cpuplayer.h"
-#include <algorithm>
+#include <crow/app.h>
 #include <iostream>
 #include <memory>
+#include "crow.h"
+#include "../includes/inja.hpp"
+#include "../includes/json.hpp"
 
 
 int main() {
-    auto p1 = std::make_unique<CpuPlayer>(CpuPlayer('o'));
+    auto p1 = std::make_unique<Player>(Player('o'));
     auto p2 = std::make_unique<MaybeEvenBetterCpuPlayer>(MaybeEvenBetterCpuPlayer('x'));
 
     auto g = Game(std::move(p1), std::move(p2), ' ');
+    
+    crow::SimpleApp app;
 
-    while(g.running) {
-        g.board.display();
-        g.printPlayerInfo();
-        
-        Coord move = g.players[g.curr_idx]->choseSquare(g);
+    CROW_ROUTE(app, "/")([&g](){
+            inja::Environment env {"templates/"};
 
-        int fliped;
+            inja::json data;
+            data["board"] = g.board.board;
+            data["empty"] = g.board.empty_square_marker;
+            data["player1"] = g.players[0]->piece;
+            data["player2"] = g.players[1]->piece;
+            auto page = env.render_file("index.html", data);
 
-        fliped = g.play(move);
+            return page;
+            });
 
-        if (fliped == -2) {
-            g.board.display();
-            g.endGame();
-            break;
-        }
-        
-        if (fliped == 0) {
-            std::cout << "Must playa valid square, must flip at least 1 piecez\n";
-            continue;
-        }
-        
-        g.board.display();
-        g.printPlayerInfo();
+    CROW_ROUTE(app, "/play/<int>/<int>")([&g](int i, int j){
+            g.play(Coord{i, j});
+            g.play(g.players[g.curr_idx]->choseSquare(g));
 
-        Coord cpu_move = g.players[g.curr_idx]->choseSquare(g);
+            inja::Environment env {"templates/"};
+            inja::json data;
+            data["board"] = g.board.board;
+            data["empty"] = g.board.empty_square_marker;
+            data["player1"] = g.players[0]->piece;
+            data["player2"] = g.players[1]->piece;
+            auto page = env.render_file("board.html", data);
 
-        if(cpu_move == move) {
-            std::cout << "Both skipped, no more moves availabe\n";
-            g.endGame();
-            break;
-        }
+            return page;
+            });
 
-        int over = g.play(cpu_move);
-
-        if (over == -2 ) {
-            g.board.display();
-            g.endGame();
-            break;
-        }
-    }
+    app.port(5000).multithreaded().run();
 }

@@ -1,0 +1,22 @@
+<div id="board">
+    {% for row in board %}
+        {% for square in row %}
+        <div 
+            class="square" 
+            hx-get="/play/{{loop.parent.index}}/{{loop.index}}"
+            hx-trigger="click"
+            hx-target="#board"
+            hx-swap="outerHTML"
+            style='background-color: 
+                {% if square == empty %}
+                    green 
+                {% else if square == player1 %}
+                    white
+                {% else %}
+                    black 
+                {% endif %};'
+            >
+        </div>
+        {% endfor %}
+    {% endfor %}
+</div>

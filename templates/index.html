@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <title>Othello Skynet</title>
+        <script src="https://unpkg.com/htmx.org@1.9.8"></script>
+    </head>
+    <style>
+        body  {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #board {
+            display: grid;
+            grid-template: auto auto auto auto auto auto auto auto / auto auto auto auto auto auto auto auto;
+            width: 50%;
+            height: 50%;
+        }
+
+        .square {
+            height: 100px;
+            width: 100px;
+            margin: 3px;
+            border: 1px solid black;
+            border-radius: 10px;
+        }
+    </style>
+    <body>  
+        <h1>Othello Engine</h1>
+
+        {% include "board.html" %}
+    </body>
+</html>

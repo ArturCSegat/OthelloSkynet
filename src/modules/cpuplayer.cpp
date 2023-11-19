@@ -148,7 +148,7 @@ float BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> gam
 MaybeEvenBetterCpuPlayer::MaybeEvenBetterCpuPlayer(char p) : BetterCpuPlayer(p) {};
 
 Coord MaybeEvenBetterCpuPlayer::choseSquare(const Game& game) {
-    std::map<float, Coord> moves;
+    std::map<int, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
