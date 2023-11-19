@@ -1,11 +1,11 @@
 #include "../includes/game.h"
 #include "../includes/cpuplayer.h"
-#include <crow/app.h>
 #include <iostream>
 #include <memory>
-#include "crow.h"
 #include "../includes/inja.hpp"
 #include "../includes/json.hpp"
+#include "../includes/crow_all.h"
+
 
 
 int main() {
