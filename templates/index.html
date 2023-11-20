@@ -33,5 +33,19 @@
         <h1>Othello Engine</h1>
         
         {% include "game-info.html" %}
+        <div
+            hx-get="/play/-1/-1"
+            hx-trigger="click"
+            hx-target="#game-info"
+            hx-swap="outerHTML"
+            style="  
+                width: fit-content;
+                height: auto;
+                border: 1px solid black;
+                border-radius: 10px;
+            "
+        >
+            Pass Turn
+        </div>
     </body>
 </html>

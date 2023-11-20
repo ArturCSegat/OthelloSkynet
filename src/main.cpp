@@ -34,7 +34,7 @@ int main() {
 
     CROW_ROUTE(app, "/play/<int>/<int>")([&g](int i, int j){
             g.play(Coord{i, j});
-            // g.play(g.players[g.curr_idx]->choseSquare(g));
+            g.play(g.players[g.curr_idx]->choseSquare(g));
 
             inja::Environment env {"templates/"};
             inja::json data;
