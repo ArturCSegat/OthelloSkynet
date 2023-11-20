@@ -1,0 +1,20 @@
+<div id="game-info">
+    {% include "board.html" %}
+    <div style="display: flex; flex-direction: column;">
+        <p>player 1 piece count: {{ p1_count }}</p>
+        <p>player 2 piece count: {{ p2_count }}</p>
+        <div style="display: flex; flex-direction: row;">
+            <p>turn:</p>
+            <div 
+                class="square" 
+                style='background-color: 
+                {% if turn == player1 %}
+                white
+                {% else %}
+                black 
+                {% endif %};'
+                >
+            </div>
+        </div>
+    </div>
+</div>

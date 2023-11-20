@@ -5,7 +5,7 @@
             class="square" 
             hx-get="/play/{{loop.parent.index}}/{{loop.index}}"
             hx-trigger="click"
-            hx-target="#board"
+            hx-target="#game-info"
             hx-swap="outerHTML"
             style='background-color: 
                 {% if square == empty %}

@@ -24,6 +24,9 @@ int main() {
             data["empty"] = g.board.empty_square_marker;
             data["player1"] = g.players[0]->piece;
             data["player2"] = g.players[1]->piece;
+            data["p1_count"] = g.players[0]->piece_count;
+            data["p2_count"] = g.players[1]->piece_count;
+            data["turn"] = g.players[g.curr_idx]->piece;
             auto page = env.render_file("index.html", data);
 
             return page;
@@ -31,7 +34,7 @@ int main() {
 
     CROW_ROUTE(app, "/play/<int>/<int>")([&g](int i, int j){
             g.play(Coord{i, j});
-            g.play(g.players[g.curr_idx]->choseSquare(g));
+            // g.play(g.players[g.curr_idx]->choseSquare(g));
 
             inja::Environment env {"templates/"};
             inja::json data;
@@ -39,7 +42,10 @@ int main() {
             data["empty"] = g.board.empty_square_marker;
             data["player1"] = g.players[0]->piece;
             data["player2"] = g.players[1]->piece;
-            auto page = env.render_file("board.html", data);
+            data["p1_count"] = g.players[0]->piece_count;
+            data["p2_count"] = g.players[1]->piece_count;
+            data["turn"] = g.players[g.curr_idx]->piece;
+            auto page = env.render_file("game-info.html", data);
 
             return page;
             });

@@ -9,6 +9,11 @@
             flex-direction: column;
         }
 
+        #game-info {
+            display: flex;
+            flex-direction: row;
+        }
+
         #board {
             display: grid;
             grid-template: auto auto auto auto auto auto auto auto / auto auto auto auto auto auto auto auto;
@@ -26,7 +31,7 @@
     </style>
     <body>  
         <h1>Othello Engine</h1>
-
-        {% include "board.html" %}
+        
+        {% include "game-info.html" %}
     </body>
 </html>
