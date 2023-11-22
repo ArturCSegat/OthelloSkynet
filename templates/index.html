@@ -2,12 +2,19 @@
     <head>
         <title>Othello Skynet</title>
         <script src="https://unpkg.com/htmx.org@1.9.8"></script>
-    </head>
-    <style>
-        body  {
-            display: flex;
-            flex-direction: column;
-        }
+        <script>
+            function handlePlay(x, y) {
+                htmx.ajax("GET", "/play/"+x+"/"+y, {target:"#game-info", swap:"outerHTML"});
+                new Promise(r => setTimeout(r, 500)).then(() => {
+                    htmx.ajax("GET", "/game", {target:"#game-info", swap:"outerHTML"});
+                });
+            }
+        </script>
+        <style>
+            body  {
+                display: flex;
+                flex-direction: column;
+            }
 
         #game-info {
             display: flex;
@@ -28,7 +35,8 @@
             border: 1px solid black;
             border-radius: 10px;
         }
-    </style>
+        </style>
+    </head>
     <body>  
         <h1>Othello Engine</h1>
         
@@ -46,6 +54,7 @@
             "
         >
             Pass Turn
+
         </div>
     </body>
 </html>

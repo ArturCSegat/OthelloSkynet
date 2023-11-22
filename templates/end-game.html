@@ -1,0 +1,23 @@
+<div id="game-info" style=
+    "
+    display: flex; flex-direction: column;
+    ">
+    <h1>{{ end-text }}</h1>
+    <div style="display: flex; flex-direction: row;">
+        <p>player 1 piece count: {{ p1_count }}</p>
+        <p>player 2 piece count: {{ p2_count }}</p>
+    </div>
+    <div 
+        class="square" 
+        style='background-color: 
+        {% if winner == player1 %}
+        white
+        {% else if winner == player2%}
+        black 
+        {% else %}
+        grey
+        {% endif %};'
+        >
+    </div>
+</div>
+
