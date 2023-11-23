@@ -2,6 +2,7 @@
 #include "../../includes/game.h"
 #include <cmath>
 #include <ctime>
+#include <stdlib.h>
 #include <map>
 #include <memory>
 #include <iostream>
@@ -75,7 +76,8 @@ Coord CpuPlayer::choseSquare(const Game& game) {
                 continue;
             }
             
-            float fit = std::pow((aval_rows[i] * aval_cols[j]), 2) + flipped;
+            float positional_factor = 1 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2-1))); 
+            float fit = std::pow((aval_rows[i] * aval_cols[j]), positional_factor) + flipped;
 
             moves[fit] = Coord{i, j};
         }
@@ -111,9 +113,9 @@ Coord BetterCpuPlayer::choseSquare(const Game& game) {
         return Coord{-1, -1};
     }
     
-    for (const auto &[fit, move]: moves) {
-        std::cout << "move: " << move.toString() << " value: " << fit << "\n";
-    }
+    // for (const auto &[fit, move]: moves) {
+    //     std::cout << "move: " << move.toString() << " value: " << fit << "\n";
+    // }
 
     Coord best_move = moves[moves.rbegin()->first];
 
@@ -122,7 +124,7 @@ Coord BetterCpuPlayer::choseSquare(const Game& game) {
     return best_move;
 }
 
-float BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game) {
+int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game) {
     game->play(move);
     Coord sq;
     do{
@@ -136,11 +138,7 @@ float BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> gam
 
     int this_idx = game->players[1]->piece == this->piece;
 
-    if (game->players[this_idx]->piece_count < game->players[!this_idx]->piece_count) {
-        return (game->players[this_idx]->piece_count / (float)(play_count + 1)) + 0.1;
-    }
-    
-    return game->players[this_idx]->play_count;
+    return game->players[this_idx]->piece_count - game->players[!this_idx]->piece_count;
 }
 
 
@@ -164,33 +162,32 @@ Coord MaybeEvenBetterCpuPlayer::choseSquare(const Game& game) {
         return Coord{-1, -1};
     }
     
-    for (const auto &[fit, move]: moves) {
-        std::cout << "move: " << move.toString() << " value: " << fit << "\n";
-    }
+    // for (const auto &[fit, move]: moves) {
+    //     std::cout << "move: " << move.toString() << " value: " << fit << "\n";
+    // }
 
     Coord best_move = moves[moves.rbegin()->first];
 
-    std::cout << "Playing " << best_move.toString() << "\n";
-    std::this_thread::sleep_for(std::chrono::milliseconds(750));
+    // std::cout << "Playing " << best_move.toString() << "\n";
+    // std::this_thread::sleep_for(std::chrono::milliseconds(250));
     return best_move;
 }
 
 int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique_ptr<Game> game) {
     game->play(move);
     
-    int winning_count = 0;
+    int aval_sum;
+    
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if(game->board[Coord{i, j}] != game->board.empty_square_marker
                     || game->flipedFromMove(Coord{i, j}).size() == 0) {
                 continue;
             }
-            float fit = avaliateMoveTillEnd(Coord{i, j}, game->clone());
-            if ((int)fit == fit) {
-                winning_count++;
-            }
+            int fit = avaliateMoveTillEnd(Coord{i, j}, game->clone());
+            aval_sum += fit;
         }
     }
 
-    return winning_count;
+    return aval_sum;
 }

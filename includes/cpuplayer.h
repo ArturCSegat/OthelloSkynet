@@ -28,7 +28,7 @@ public:
     ~BetterCpuPlayer() override = default;
     
     Coord choseSquare(const Game& game) override;
-    float avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game);
+    int avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game);
 };
 
 class MaybeEvenBetterCpuPlayer : public BetterCpuPlayer {
