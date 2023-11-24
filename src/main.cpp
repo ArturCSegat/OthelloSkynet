@@ -2,99 +2,106 @@
 #include "../includes/cpuplayer.h"
 #include <iostream>
 #include <memory>
-#include <chrono>
-#include <thread>
+#include "../includes/inja.hpp"
+#include "../includes/json.hpp"
+#include "../includes/crow_all.h"
 
-#define GAME_COUNT 100
+
 
 int main() {
+    auto p1 = std::make_unique<Player>(Player('o'));
+    auto p2 = std::make_unique<MaybeEvenBetterCpuPlayer>(MaybeEvenBetterCpuPlayer('x'));
 
-    int p1_w_c = 0;
-    int p2_w_c = 0;
-    int draws = 0;
-    srand (static_cast <unsigned> (time(0)));
+    auto g = Game(std::move(p1), std::move(p2), ' ');
     
-    for (int i = 0; i  < GAME_COUNT; i++) {
+    crow::SimpleApp app;
 
-        auto p1 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('o'));
-        auto p2 = std::make_unique<MaybeEvenBetterCpuPlayer>(MaybeEvenBetterCpuPlayer('x'));
+    CROW_ROUTE(app, "/")([&g](){
+            inja::Environment env {"templates/"};
 
-        auto g = Game(std::move(p1), std::move(p2), ' ');
+            inja::json data;
+            data["board"] = g.board.board;
+            data["empty"] = g.board.empty_square_marker;
+            data["player1"] = g.players[0]->piece;
+            data["player2"] = g.players[1]->piece;
+            data["p1_count"] = g.players[0]->piece_count;
+            data["p2_count"] = g.players[1]->piece_count;
+            data["turn"] = g.players[g.curr_idx]->piece;
+            auto page = env.render_file("index.html", data);
 
-        while(g.running) {
-            // g.board.display();
-            // g.printPlayerInfo();
+            return page;
+            });
 
-            Coord move = g.players[g.curr_idx]->choseSquare(g);
+    CROW_ROUTE(app, "/play/<int>/<int>")([&g](int i, int j){
+            int over = g.play(Coord{i, j});
+            
+            inja::Environment env {"templates/"};
+            inja::json data;
+            crow::response res;
 
-            int fliped;
+            data["board"] = g.board.board;
+            data["empty"] = g.board.empty_square_marker;
+            data["player1"] = g.players[0]->piece;
+            data["player2"] = g.players[1]->piece;
+            data["p1_count"] = g.players[0]->piece_count;
+            data["p2_count"] = g.players[1]->piece_count;
+            data["turn"] = g.players[g.curr_idx]->piece;
+            auto page = env.render_file("game-info.html", data);
 
-            fliped = g.play(move);
+            // playing after rendering the page will ensure the player
+            // does not receive the up to date state of the board, but the changes
+            // their play made, you should then call "/game" to get the updated with CPU move
+            g.play(g.players[g.curr_idx]->choseSquare(g));
 
-            if (fliped == -2) {
-                // g.board.display();
-                g.endGame();
-                // std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                int winner_idx = g.players[1]->piece_count > g.players[0]->piece_count;
-                int draw  = g.players[1]->piece_count == g.players[0]->piece_count;
+            res.add_header("HX-TRIGGER-AFTER-SETTLE", "update-cpu");
+            res.write(page);
+            std::cout << "HEEEEY\n";
+            return res;
+            });
+
+    CROW_ROUTE(app, "/game")([&g](){
+            std::cout << "oiiiii\n";
+            inja::Environment env {"templates/"};
+            inja::json data;
+
+            if (g.running == false) {
+                data["player1"] = g.players[0]->piece;
+                data["player2"] = g.players[1]->piece;
+                data["p1_count"] = g.players[0]->piece_count;
+                data["p2_count"] = g.players[1]->piece_count;
                 
-                if (draw) {
-                    draws++;
-                } else if (winner_idx == 1) {
-                    p2_w_c++;
-                } else if (winner_idx == 0) {
-                    p1_w_c++;
-                }
-                break;
-            }
-
-            if (fliped == 0) {
-                std::cout << "Must playa valid square, must flip at least 1 piecez\n";
-                continue;
-            }
-
-            // g.board.display();
-            // g.printPlayerInfo();
-
-            Coord cpu_move = g.players[g.curr_idx]->choseSquare(g);
-
-            if(cpu_move == move) {
-                std::cout << "Both skipped, no more moves availabe\n";
-                g.endGame();
                 int winner_idx = g.players[1]->piece_count > g.players[0]->piece_count;
-                int draw  = g.players[1]->piece_count == g.players[0]->piece_count;
-                
-                if (draw) {
-                    draws++;
-                } else if (winner_idx == 1) {
-                    p2_w_c++;
-                } else if (winner_idx == 0) {
-                    p1_w_c++;
+                int reverse = g.players[0]->piece_count > g.players[1]->piece_count;
+
+                std::string end_text;
+
+                if (winner_idx == reverse) {
+                    end_text = "\n\n The Grame Drawed \n\n";
+                } else {
+                    std::ostringstream oss;
+                    oss << "\n\n The Winner of game " << " is " << g.players[winner_idx]->piece << "\n\n";
+                    end_text = oss.str();
                 }
-                break;
+
+                data["end-text"] = end_text;
+                data["winner"] = g.players[winner_idx]->piece;
+                auto page = env.render_file("end-game.html", data);
+                return page;
             }
 
-            int over = g.play(cpu_move);
 
-            if (over == -2 ) {
-                // g.board.display();
-                g.endGame();
-                // std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                int winner_idx = g.players[1]->piece_count > g.players[0]->piece_count;
-                int draw  = g.players[1]->piece_count == g.players[0]->piece_count;
-                
-                if (draw) {
-                    draws++;
-                } else if (winner_idx == 1) {
-                    p2_w_c++;
-                } else if (winner_idx == 0) {
-                    p1_w_c++;
-                }
-                break;
-            }
-        }
-    }
-    std::cout << "p1 win count: " << p1_w_c << "\n";
-    std::cout << "p2 win count: " << p2_w_c << "\n";
-    std::cout << "draws: " << draws << "\n";
+            data["board"] = g.board.board;
+            data["empty"] = g.board.empty_square_marker;
+            data["player1"] = g.players[0]->piece;
+            data["player2"] = g.players[1]->piece;
+            data["p1_count"] = g.players[0]->piece_count;
+            data["p2_count"] = g.players[1]->piece_count;
+            data["turn"] = g.players[g.curr_idx]->piece;
+            auto page = env.render_file("game-info.html", data);
+
+            return page;
+            });
+
+
+    app.port(5000).multithreaded().run();
 }
