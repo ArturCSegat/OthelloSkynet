@@ -4,10 +4,10 @@
 #include <vector>
 
 Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square) {
-    board[Coord{3, 4}] = player1->piece;
-    board[Coord{4, 3}] = player1->piece;
-    board[Coord{3, 3}] = player2->piece;
-    board[Coord{4, 4}] = player2->piece;
+    board[Coord{3, 3}] = player1->piece;
+    board[Coord{4, 4}] = player1->piece;
+    board[Coord{3, 4}] = player2->piece;
+    board[Coord{4, 3}] = player2->piece;
     player1->piece_count += 2;
     player2->piece_count += 2;
 

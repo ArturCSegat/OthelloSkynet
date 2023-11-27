@@ -55,12 +55,10 @@ int main() {
 
             res.add_header("HX-TRIGGER-AFTER-SETTLE", "update-cpu");
             res.write(page);
-            std::cout << "HEEEEY\n";
             return res;
             });
 
     CROW_ROUTE(app, "/game")([&g](){
-            std::cout << "oiiiii\n";
             inja::Environment env {"templates/"};
             inja::json data;
 
