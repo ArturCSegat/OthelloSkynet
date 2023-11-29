@@ -114,3 +114,8 @@ void Game::printPlayerInfo(){
     std::cout << "player " << players[0]->piece << ": " << players[0]->piece_count << "\n";
     std::cout << "player " << players[1]->piece << ": " << players[1]->piece_count << "\n";
 }
+
+int Game::playerAval(char player) {
+    int this_idx = this->players[1]->piece == player;
+    return this->players[this_idx]->piece_count - this->players[!this_idx]->piece_count;
+}

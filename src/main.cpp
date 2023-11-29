@@ -51,14 +51,18 @@ int main() {
             // playing after rendering the page will ensure the player
             // does not receive the up to date state of the board, but the changes
             // their play made, you should then call "/game" to get the updated with CPU move
-            g.play(g.players[g.curr_idx]->choseSquare(g));
+            if (g.players[g.curr_idx]->piece != 'o') {
+                g.play(g.players[g.curr_idx]->choseSquare(g));
+            }
 
             res.add_header("HX-TRIGGER-AFTER-SETTLE", "update-cpu");
             res.write(page);
+            std::cout << "HEEEEY\n";
             return res;
             });
 
     CROW_ROUTE(app, "/game")([&g](){
+            std::cout << "oiiiii\n";
             inja::Environment env {"templates/"};
             inja::json data;
 
@@ -84,6 +88,9 @@ int main() {
                 data["end-text"] = end_text;
                 data["winner"] = g.players[winner_idx]->piece;
                 auto page = env.render_file("end-game.html", data);
+
+                g = Game(std::make_unique<Player>(Player('o')), std::make_unique<MaybeEvenBetterCpuPlayer>(MaybeEvenBetterCpuPlayer('x')),' ');
+                
                 return page;
             }
 

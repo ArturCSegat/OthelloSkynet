@@ -25,6 +25,9 @@ public:
     void endGame();
 
     void printPlayerInfo();
+
+    // returns the avaliation of a givenn player
+    int playerAval(char player);
 };
 
 #endif

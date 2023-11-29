@@ -77,6 +77,7 @@ Coord CpuPlayer::choseSquare(const Game& game) {
             }
             
             float positional_factor = 1 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2-1))); 
+            positional_factor = 2;
             float fit = std::pow((aval_rows[i] * aval_cols[j]), positional_factor) + flipped;
 
             moves[fit] = Coord{i, j};
@@ -190,4 +191,91 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     }
 
     return aval_sum;
+}
+
+MinMaxCpuPlayer::MinMaxCpuPlayer(char p) : BetterCpuPlayer(p) {};
+
+Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
+    std::map<float, Coord> moves;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                continue;
+            }
+            
+            auto clone = game.clone();
+            clone->play(Coord{i, j});
+            moves[Max(*clone, 0)] = Coord{i, j};
+        }
+    }
+
+    if (moves.empty()) {
+        return Coord{-1, -1};
+    }
+    
+    return moves[moves.rbegin()->first];
+}
+
+float MinMaxCpuPlayer::Max(Game& game, int depth) {
+    int max_aval = -999;
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                continue;
+            }
+
+            auto clone = game.clone();
+            int r = clone->play(Coord{i, j});
+
+            int aval;
+            if (r == -2) {
+                aval = clone->playerAval(this->piece);
+            } else if (depth == MAX_DEPTH) {
+                aval = avaliateMoveTillEnd(Coord{-1, -1}, clone->clone());
+            } else {
+                auto next_clone = clone->clone();
+                aval = Min(*next_clone, depth + 1);
+            }
+            
+            if (aval > max_aval) {
+                max_aval = aval;
+            }
+        }
+    }
+    return max_aval;
+}
+
+
+float MinMaxCpuPlayer::Min(Game& game, int depth) {
+    int max_aval = -999;
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                continue;
+            }
+
+            auto clone = game.clone();
+            int r = clone->play(Coord{i, j});
+
+            int aval;
+            if (r == -2) {
+                aval = clone->playerAval(this->piece);
+            } else if (depth == MAX_DEPTH) {
+                aval = avaliateMoveTillEnd(Coord{-1, -1}, clone->clone());
+            } else {
+                auto next_clone = clone->clone();
+                aval = Max(*next_clone, depth + 1);
+            }
+            
+            if (aval > max_aval) {
+                max_aval = aval;
+            }
+        }
+    }
+    return max_aval;
 }
