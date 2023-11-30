@@ -78,7 +78,7 @@ Coord CpuPlayer::choseSquare(const Game& game) {
                 continue;
             }
             
-            float positional_factor = 1 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2-1))); 
+            float positional_factor = 1.5 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2-1.5))); 
             float fit = std::pow((aval_rows[i] * aval_cols[j]), positional_factor) + flipped;
 
             moves[fit] = Coord{i, j};
@@ -231,7 +231,17 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, int depth) {
     if (r == -2) {
         return aval = game.playerAval();
     } else if (depth == MAX_DEPTH) {
-        return aval = avaliateMoveTillEnd(CpuPlayer::choseSquare(game), game.clone());
+        Coord sq;
+        do{
+            Coord tmp = CpuPlayer::choseSquare(game);
+            // not sure why but it eliminates bad sub-trees i guess;
+            if (tmp == sq) {
+                break;
+            }
+            sq = tmp;
+        }while(game.play(sq) != -2);
+
+        return game.playerAval();
     }
 
     for (int i = 0; i < 8; i++) {
@@ -261,7 +271,17 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, int depth) {
     if (r == -2) {
         return aval = game.playerAval();
     } else if (depth == MAX_DEPTH) {
-        return aval = avaliateMoveTillEnd(CpuPlayer::choseSquare(game), game.clone());
+        Coord sq;
+        do{
+            Coord tmp = CpuPlayer::choseSquare(game);
+            // not sure why but it eliminates bad sub-trees i guess;
+            if (tmp == sq) {
+                break;
+            }
+            sq = tmp;
+        }while(game.play(sq) != -2);
+
+        return game.playerAval();
     }
 
     for (int i = 0; i < 8; i++) {
