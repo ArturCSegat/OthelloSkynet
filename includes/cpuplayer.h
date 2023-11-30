@@ -2,7 +2,6 @@
 #define CPU_PLAYER_H
 
 #include "game.h"
-#define MAX_DEPTH 3
 
 class BadCpuPlayer: public Player {
 public:
@@ -49,8 +48,8 @@ public:
 
     Coord choseSquare(const Game& game) override;
 private:
-    float Min(Game& game, int depth);
-    float Max(Game& game, int depth);
+    float Min(Game& game, Coord move, int depth);
+    float Max(Game& game, Coord move, int depth);
 };
 
 #endif

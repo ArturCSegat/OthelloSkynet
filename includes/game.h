@@ -27,7 +27,7 @@ public:
     void printPlayerInfo();
 
     // returns the avaliation of a givenn player
-    int playerAval(char player);
+    int playerAval();
 };
 
 #endif

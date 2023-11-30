@@ -9,6 +9,8 @@
 #include <thread>
 #include <chrono>
 
+#define MAX_DEPTH 4
+
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
 Coord BadCpuPlayer::choseSquare(const Game& game) {
@@ -77,7 +79,6 @@ Coord CpuPlayer::choseSquare(const Game& game) {
             }
             
             float positional_factor = 1 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2-1))); 
-            positional_factor = 2;
             float fit = std::pow((aval_rows[i] * aval_cols[j]), positional_factor) + flipped;
 
             moves[fit] = Coord{i, j};
@@ -126,6 +127,7 @@ Coord BetterCpuPlayer::choseSquare(const Game& game) {
 }
 
 int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game) {
+    // std::cout << "move: " << move.toString() << " avaliateMoveTillEnd\n";
     game->play(move);
     Coord sq;
     do{
@@ -196,7 +198,9 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
 MinMaxCpuPlayer::MinMaxCpuPlayer(char p) : BetterCpuPlayer(p) {};
 
 Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
-    std::map<float, Coord> moves;
+    int max_aval = -9999;
+    auto max_move = Coord{-1, -1};
+
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
@@ -205,20 +209,30 @@ Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
             }
             
             auto clone = game.clone();
-            clone->play(Coord{i, j});
-            moves[Max(*clone, 0)] = Coord{i, j};
+            int fit = Max(*clone, Coord{i, j}, 0);
+
+            if (fit > max_aval) {
+                max_aval = fit;
+                max_move = Coord{i, j};
+            }
         }
     }
 
-    if (moves.empty()) {
-        return Coord{-1, -1};
-    }
-    
-    return moves[moves.rbegin()->first];
+    return max_move;
 }
 
-float MinMaxCpuPlayer::Max(Game& game, int depth) {
+float MinMaxCpuPlayer::Max(Game& game, Coord move, int depth) {
+    // std::cout << "Max: move: " << move.toString() << ", depth: " << depth << "\n";
+
     int max_aval = -999;
+    int aval;
+    int r = game.play(move);
+
+    if (r == -2) {
+        return aval = game.playerAval();
+    } else if (depth == MAX_DEPTH) {
+        return aval = avaliateMoveTillEnd(CpuPlayer::choseSquare(game), game.clone());
+    }
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -226,19 +240,7 @@ float MinMaxCpuPlayer::Max(Game& game, int depth) {
                     || game.flipedFromMove(Coord{i, j}).size() == 0){
                 continue;
             }
-
-            auto clone = game.clone();
-            int r = clone->play(Coord{i, j});
-
-            int aval;
-            if (r == -2) {
-                aval = clone->playerAval(this->piece);
-            } else if (depth == MAX_DEPTH) {
-                aval = avaliateMoveTillEnd(Coord{-1, -1}, clone->clone());
-            } else {
-                auto next_clone = clone->clone();
-                aval = Min(*next_clone, depth + 1);
-            }
+            aval = Min(*game.clone(), Coord{i, j}, depth + 1);
             
             if (aval > max_aval) {
                 max_aval = aval;
@@ -249,8 +251,18 @@ float MinMaxCpuPlayer::Max(Game& game, int depth) {
 }
 
 
-float MinMaxCpuPlayer::Min(Game& game, int depth) {
-    int max_aval = -999;
+float MinMaxCpuPlayer::Min(Game& game, Coord move, int depth) {
+    // std::cout << "Min: move: " << move.toString() << ", depth: " << depth << "\n";
+
+    int max_aval = 999;
+    int aval;
+    int r = game.play(move);
+
+    if (r == -2) {
+        return aval = game.playerAval();
+    } else if (depth == MAX_DEPTH) {
+        return aval = avaliateMoveTillEnd(CpuPlayer::choseSquare(game), game.clone());
+    }
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -258,21 +270,9 @@ float MinMaxCpuPlayer::Min(Game& game, int depth) {
                     || game.flipedFromMove(Coord{i, j}).size() == 0){
                 continue;
             }
-
-            auto clone = game.clone();
-            int r = clone->play(Coord{i, j});
-
-            int aval;
-            if (r == -2) {
-                aval = clone->playerAval(this->piece);
-            } else if (depth == MAX_DEPTH) {
-                aval = avaliateMoveTillEnd(Coord{-1, -1}, clone->clone());
-            } else {
-                auto next_clone = clone->clone();
-                aval = Max(*next_clone, depth + 1);
-            }
+            aval = Max(*game.clone(), Coord{i, j}, depth + 1);
             
-            if (aval > max_aval) {
+            if (aval < max_aval) {
                 max_aval = aval;
             }
         }
