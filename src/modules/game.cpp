@@ -20,7 +20,6 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
 
 std::vector<Coord> Game::flipedFromMove(Coord move) const{
     std::vector<Coord> fill;
-    fill.reserve(24);
 
     board.playVertical(move, players[curr_idx], players[!curr_idx], fill);
     board.playHorizontal(move, players[curr_idx], players[!curr_idx], fill);
