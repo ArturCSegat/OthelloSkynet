@@ -2,6 +2,7 @@
 #include "../../includes/game.h"
 #include <iostream>
 #include <vector>
+#include <math.h>
 
 Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square) {
     board[Coord{3, 3}] = player1->piece;
@@ -18,7 +19,7 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
     running = true;
 }
 
-std::vector<Coord> Game::flipedFromMove(Coord move) const{
+std::vector<Coord> Game::flipedFromMove(Coord move, int player) const{
     std::vector<Coord> fill;
 
     board.playVertical(move, players[curr_idx], players[!curr_idx], fill);
@@ -47,7 +48,7 @@ int Game::play(Coord c) {
         return 0;
     }
 
-    std::vector<Coord> to_flip = flipedFromMove(c);
+    std::vector<Coord> to_flip = flipedFromMove(c, this->curr_idx);
 
     if (to_flip.size() == 0) {
         return 0;
@@ -114,6 +115,28 @@ void Game::printPlayerInfo(){
     std::cout << "player " << players[1]->piece << ": " << players[1]->piece_count << "\n";
 }
 
-int Game::playerAval() {
-    return this->players[1]->piece_count - this->players[0]->piece_count;
+int Game::playerAval(float * aval_rows, float * aval_cols) {
+    int p0_aval = 0;
+    int p1_aval = 0;
+    
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            char space = this->board[Coord{i, j}];
+
+            if (space == this->board.empty_square_marker) {
+                // p0_aval += pow((aval_rows[i] * aval_cols[j]), 2) * flipedFromMove(Coord{i, j}, 0).size();
+                // p1_aval += pow((aval_rows[i] * aval_cols[j]), 2) * flipedFromMove(Coord{i, j}, 1).size();
+                continue;
+            }
+
+            if (space == this->players[0]->piece) {
+                p0_aval += pow(aval_rows[i], 2) * pow(aval_cols[j], 2);
+                continue;
+            }
+            p1_aval += pow(aval_rows[i], 2) * pow(aval_cols[j], 2);
+;
+        }
+    }
+
+    return (p1_aval * this->players[1]->piece_count) - (p0_aval * this->players[0]->piece_count);
 }

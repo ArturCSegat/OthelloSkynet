@@ -16,7 +16,7 @@ public:
 
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
 
-    std::vector<Coord> flipedFromMove(Coord move) const;
+    std::vector<Coord> flipedFromMove(Coord move, int player_idx) const;
 
     int play(Coord c);
 
@@ -27,7 +27,7 @@ public:
     void printPlayerInfo();
 
     // returns the avaliation of a givenn player
-    int playerAval();
+    int playerAval(float * aval_rows, float * aval_cols);
 };
 
 #endif

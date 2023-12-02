@@ -9,7 +9,7 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 4
+#define MAX_DEPTH 5
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -20,7 +20,7 @@ Coord BadCpuPlayer::choseSquare(const Game& game) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker) {
                 continue;
             }
-            int flipped = game.flipedFromMove(Coord{i, j}).size(); 
+            int flipped = game.flipedFromMove(Coord{i, j}, game.curr_idx).size(); 
             if (flipped == 0) {
                 continue;
             }
@@ -48,21 +48,21 @@ CpuPlayer::CpuPlayer(char p): Player(p){
     // centro tem valor aumentado
 
     aval_rows[0] = 2;
-    aval_rows[1] = 0.5;
+    aval_rows[1] = 0.25;
     aval_rows[2] = 1;
     aval_rows[3] = 1.5;
     aval_rows[4] = 1.5;
     aval_rows[5] = 1;
-    aval_rows[6] = 0.5;
+    aval_rows[6] = 0.25;
     aval_rows[7] = 2;
 
     aval_cols[0] = 2;
-    aval_cols[1] = 0.5;
+    aval_cols[1] = 0.25;
     aval_cols[2] = 1;
     aval_cols[3] = 1.5;
     aval_cols[4] = 1.5;
     aval_cols[5] = 1;
-    aval_cols[6] = 0.5;
+    aval_cols[6] = 0.25;
     aval_cols[7] = 2;
 }
 
@@ -73,7 +73,7 @@ Coord CpuPlayer::choseSquare(const Game& game) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker){
                 continue;
             }
-            int flipped = game.flipedFromMove(Coord{i, j}).size(); 
+            int flipped = game.flipedFromMove(Coord{i, j}, game.curr_idx).size(); 
             if (flipped == 0) {
                 continue;
             }
@@ -103,7 +103,7 @@ Coord BetterCpuPlayer::choseSquare(const Game& game) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
             moves[avaliateMoveTillEnd(Coord{i, j}, std::move(game.clone()))] = Coord{i, j};
@@ -153,7 +153,7 @@ Coord MaybeEvenBetterCpuPlayer::choseSquare(const Game& game) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
             moves[avaliateShallowTreeTillEnd(Coord{i, j}, game.clone())] = Coord{i, j};
@@ -184,7 +184,7 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if(game->board[Coord{i, j}] != game->board.empty_square_marker
-                    || game->flipedFromMove(Coord{i, j}).size() == 0) {
+                    || game->flipedFromMove(Coord{i, j}, game->curr_idx).size() == 0) {
                 continue;
             }
             int fit = avaliateMoveTillEnd(Coord{i, j}, game->clone());
@@ -204,7 +204,7 @@ Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
             
@@ -228,26 +228,14 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, int depth) {
     int aval;
     int r = game.play(move);
 
-    if (r == -2) {
-        return aval = game.playerAval();
-    } else if (depth == MAX_DEPTH) {
-        Coord sq;
-        do{
-            Coord tmp = CpuPlayer::choseSquare(game);
-            // not sure why but it eliminates bad sub-trees i guess;
-            if (tmp == sq) {
-                break;
-            }
-            sq = tmp;
-        }while(game.play(sq) != -2);
-
-        return game.playerAval();
+    if (r == -2 || depth == MAX_DEPTH) {
+        return aval = game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
     }
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
             aval = Min(*game.clone(), Coord{i, j}, depth + 1);
@@ -268,26 +256,14 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, int depth) {
     int aval;
     int r = game.play(move);
 
-    if (r == -2) {
-        return aval = game.playerAval();
-    } else if (depth == MAX_DEPTH) {
-        Coord sq;
-        do{
-            Coord tmp = CpuPlayer::choseSquare(game);
-            // not sure why but it eliminates bad sub-trees i guess;
-            if (tmp == sq) {
-                break;
-            }
-            sq = tmp;
-        }while(game.play(sq) != -2);
-
-        return game.playerAval();
+    if (r == -2 || depth == MAX_DEPTH) {
+        return aval = game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
     }
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
             aval = Max(*game.clone(), Coord{i, j}, depth + 1);
