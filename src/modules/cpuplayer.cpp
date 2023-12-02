@@ -1,5 +1,6 @@
 #include "../../includes/cpuplayer.h"
 #include "../../includes/game.h"
+#include <algorithm>
 #include <cmath>
 #include <ctime>
 #include <stdlib.h>
@@ -9,7 +10,7 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 5
+#define MAX_DEPTH 8
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -209,7 +210,7 @@ Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
             }
             
             auto clone = game.clone();
-            int fit = Max(*clone, Coord{i, j}, 0);
+            int fit = Max(*clone, Coord{i, j}, -999, 999, 0);
 
             if (fit > max_aval) {
                 max_aval = fit;
@@ -221,7 +222,7 @@ Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
     return max_move;
 }
 
-float MinMaxCpuPlayer::Max(Game& game, Coord move, int depth) {
+float MinMaxCpuPlayer::Max(Game& game, Coord move, int alpha, int beta, int depth) {
     // std::cout << "Max: move: " << move.toString() << ", depth: " << depth << "\n";
 
     int max_aval = -999;
@@ -238,7 +239,11 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, int depth) {
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
-            aval = Min(*game.clone(), Coord{i, j}, depth + 1);
+            aval = Min(*game.clone(), Coord{i, j}, alpha, beta, depth + 1);
+            alpha = std::max(alpha, aval);
+            if (beta <= alpha) {
+                break;
+            }
             
             if (aval > max_aval) {
                 max_aval = aval;
@@ -249,7 +254,7 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, int depth) {
 }
 
 
-float MinMaxCpuPlayer::Min(Game& game, Coord move, int depth) {
+float MinMaxCpuPlayer::Min(Game& game, Coord move, int alpha, int beta, int depth) {
     // std::cout << "Min: move: " << move.toString() << ", depth: " << depth << "\n";
 
     int max_aval = 999;
@@ -266,7 +271,11 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, int depth) {
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
-            aval = Max(*game.clone(), Coord{i, j}, depth + 1);
+            aval = Max(*game.clone(), Coord{i, j}, alpha, beta, depth + 1);
+            beta = std::min(beta, aval);
+            if (beta <= alpha) {
+                break;
+            }
             
             if (aval < max_aval) {
                 max_aval = aval;
