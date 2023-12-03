@@ -10,7 +10,7 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 8
+#define MAX_DEPTH 6
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -48,23 +48,23 @@ CpuPlayer::CpuPlayer(char p): Player(p){
     // casas que precedem uma extremidade tem valor 0.5 pois possibilitam ao adversário acessar a extremidade
     // centro tem valor aumentado
 
-    aval_rows[0] = 2;
-    aval_rows[1] = 0.25;
+    aval_rows[0] = 5;
+    aval_rows[1] = 0.5;
     aval_rows[2] = 1;
     aval_rows[3] = 1.5;
     aval_rows[4] = 1.5;
     aval_rows[5] = 1;
-    aval_rows[6] = 0.25;
-    aval_rows[7] = 2;
+    aval_rows[6] = 0.5;
+    aval_rows[7] = 5;
 
-    aval_cols[0] = 2;
-    aval_cols[1] = 0.25;
+    aval_cols[0] = 5;
+    aval_cols[1] = 0.5;
     aval_cols[2] = 1;
     aval_cols[3] = 1.5;
     aval_cols[4] = 1.5;
     aval_cols[5] = 1;
-    aval_cols[6] = 0.25;
-    aval_cols[7] = 2;
+    aval_cols[6] = 0.5;
+    aval_cols[7] = 5;
 }
 
 Coord CpuPlayer::choseSquare(const Game& game) {
@@ -80,6 +80,7 @@ Coord CpuPlayer::choseSquare(const Game& game) {
             }
             
             float positional_factor = 1.5 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2-1.5))); 
+            positional_factor = 2;
             float fit = std::pow((aval_rows[i] * aval_cols[j]), positional_factor) + flipped;
 
             moves[fit] = Coord{i, j};
@@ -199,7 +200,7 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
 MinMaxCpuPlayer::MinMaxCpuPlayer(char p) : BetterCpuPlayer(p) {};
 
 Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
-    int max_aval = -9999;
+    float max_aval = -9999999;
     auto max_move = Coord{-1, -1};
 
     for (int i = 0; i < 8; i++) {
@@ -210,7 +211,7 @@ Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
             }
             
             auto clone = game.clone();
-            int fit = Max(*clone, Coord{i, j}, -999, 999, 0);
+            float fit = Max(*clone, Coord{i, j}, -999, 999, 0);
 
             if (fit > max_aval) {
                 max_aval = fit;
@@ -222,15 +223,16 @@ Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
     return max_move;
 }
 
-float MinMaxCpuPlayer::Max(Game& game, Coord move, int alpha, int beta, int depth) {
+float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int depth) {
     // std::cout << "Max: move: " << move.toString() << ", depth: " << depth << "\n";
 
-    int max_aval = -999;
-    int aval;
+    // std::cout << "MAx turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
+    float max_aval = -9999999;
+    float aval;
     int r = game.play(move);
 
     if (r == -2 || depth == MAX_DEPTH) {
-        return aval = game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
+        return game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
     }
 
     for (int i = 0; i < 8; i++) {
@@ -241,12 +243,12 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, int alpha, int beta, int dept
             }
             aval = Min(*game.clone(), Coord{i, j}, alpha, beta, depth + 1);
             alpha = std::max(alpha, aval);
-            if (beta <= alpha) {
-                break;
-            }
-            
             if (aval > max_aval) {
                 max_aval = aval;
+            }
+            
+            if (beta <= alpha) {
+                break;
             }
         }
     }
@@ -254,15 +256,16 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, int alpha, int beta, int dept
 }
 
 
-float MinMaxCpuPlayer::Min(Game& game, Coord move, int alpha, int beta, int depth) {
+float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int depth) {
     // std::cout << "Min: move: " << move.toString() << ", depth: " << depth << "\n";
 
-    int max_aval = 999;
-    int aval;
+    // std::cout << "Min turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
+    float max_aval = 9999999;
+    float aval;
     int r = game.play(move);
 
     if (r == -2 || depth == MAX_DEPTH) {
-        return aval = game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
+        return game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
     }
 
     for (int i = 0; i < 8; i++) {
@@ -272,13 +275,13 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, int alpha, int beta, int dept
                 continue;
             }
             aval = Max(*game.clone(), Coord{i, j}, alpha, beta, depth + 1);
+            if (aval < max_aval) {
+                max_aval = aval;
+            }
+            
             beta = std::min(beta, aval);
             if (beta <= alpha) {
                 break;
-            }
-            
-            if (aval < max_aval) {
-                max_aval = aval;
             }
         }
     }

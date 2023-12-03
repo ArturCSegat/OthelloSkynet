@@ -48,8 +48,8 @@ public:
 
     Coord choseSquare(const Game& game) override;
 private:
-    float Min(Game& game, Coord move, int alpha, int beta, int depth);
-    float Max(Game& game, Coord move, int alpha, int beta, int depth);
+    float Min(Game& game, Coord move, float alpha, float beta, int depth);
+    float Max(Game& game, Coord move, float alpha, float beta, int depth);
 };
 
 #endif

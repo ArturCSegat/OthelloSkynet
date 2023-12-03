@@ -115,9 +115,9 @@ void Game::printPlayerInfo(){
     std::cout << "player " << players[1]->piece << ": " << players[1]->piece_count << "\n";
 }
 
-int Game::playerAval(float * aval_rows, float * aval_cols) {
-    int p0_aval = 0;
-    int p1_aval = 0;
+float Game::playerAval(float * aval_rows, float * aval_cols) {
+    float p0_aval = 1;
+    float p1_aval = 1;
     
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -129,14 +129,16 @@ int Game::playerAval(float * aval_rows, float * aval_cols) {
                 continue;
             }
 
+            int aval = pow((pow(aval_rows[i], 2) * pow(aval_cols[j], 2)), 2);
+
             if (space == this->players[0]->piece) {
-                p0_aval += pow(aval_rows[i], 2) * pow(aval_cols[j], 2);
+                p0_aval *= aval;
                 continue;
             }
-            p1_aval += pow(aval_rows[i], 2) * pow(aval_cols[j], 2);
+            p1_aval *= aval;
 ;
         }
     }
 
-    return (p1_aval * this->players[1]->piece_count) - (p0_aval * this->players[0]->piece_count);
+    return p1_aval - p0_aval;
 }
