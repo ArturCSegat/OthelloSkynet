@@ -10,7 +10,7 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 2
+#define MAX_DEPTH 10
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -198,9 +198,6 @@ MinMaxCpuPlayer::MinMaxCpuPlayer(char p) : BetterCpuPlayer(p) {};
 Coord MinMaxCpuPlayer::choseSquare(Game& game) {
     float max_aval = -9999999;
     auto max_move = Coord{-1, -1};
-    
-    auto p1 = game.players[0]->piece_count;
-    auto p2 = game.players[1]->piece_count;
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -209,8 +206,23 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
                 continue;
             }
             
+            auto p1 = game.players[0]->piece_count;
+            auto p2 = game.players[1]->piece_count;
+
             float fit = Max(game, Coord{i, j}, -999, 999, 0);
             game.undo();
+
+            auto p12 = game.players[0]->piece_count;
+            auto p22 = game.players[1]->piece_count;
+
+            if (p1 != p12 || p2 != p22) {
+                std::cout << "\nerror\n\n";
+                std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
+                std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
+                std::cout << "\nerror\n\n";
+                std::cout << "last failed coordinate: " << Coord{i, j}.toString() << "\n";
+                exit(1);
+            }
 
             if (fit > max_aval) {
                 max_aval = fit;
@@ -219,16 +231,6 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
         }
     }
 
-    auto p12 = game.players[0]->piece_count;
-    auto p22 = game.players[1]->piece_count;
-    
-    if (p1 != p12 || p2 != p22) {
-        std::cout << "\nfuck\n";
-        std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
-        std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
-        std::cout << "\nfuck\n";
-        exit(1);
-    }
 
     return max_move;
 }

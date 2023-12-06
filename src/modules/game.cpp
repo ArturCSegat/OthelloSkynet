@@ -68,7 +68,8 @@ int Game::play(Coord c) {
     curr_idx = !curr_idx;
 
     if (players[0]->piece_count + players[1]->piece_count == 64 || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
-        running = false;
+        to_flip.push_back(c);
+        this->flips.push(to_flip);
         return -2;
     }
 
@@ -89,11 +90,10 @@ void Game::undo() {
     }
 
     this->players[this->curr_idx]->piece_count += did.size() - 1;
-    this->players[!this->curr_idx]->piece_count -= did.size() - 1;
+    this->players[!this->curr_idx]->piece_count -= did.size();
     this->players[!this->curr_idx]->play_count --;
 
     this->board[played] = this->board.empty_square_marker;
-    this->players[!this->curr_idx]->piece_count --;
 
     this->curr_idx =! this->curr_idx;
 
