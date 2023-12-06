@@ -118,25 +118,30 @@ void Game::printPlayerInfo(){
 float Game::playerAval(float * aval_rows, float * aval_cols) {
     float p0_aval = 1;
     float p1_aval = 1;
-    
+    float aval;
+
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             char space = this->board[Coord{i, j}];
 
             if (space == this->board.empty_square_marker) {
-                // p0_aval += pow((aval_rows[i] * aval_cols[j]), 2) * flipedFromMove(Coord{i, j}, 0).size();
-                // p1_aval += pow((aval_rows[i] * aval_cols[j]), 2) * flipedFromMove(Coord{i, j}, 1).size();
                 continue;
             }
 
-            int aval = pow((pow(aval_rows[i], 2) * pow(aval_cols[j], 2)), 2);
+            if ((Coord{i, j} == Coord{0, 0}) ||
+                (Coord{i, j} == Coord{0, 7}) ||
+                (Coord{i, j} == Coord{7, 0}) ||
+                (Coord{i, j} == Coord{7, 7})) {
+                aval = pow((aval_rows[i] * aval_cols[j]), 3);
+            } else {
+                aval = (aval_rows[i] * aval_cols[j]);
+            }
 
             if (space == this->players[0]->piece) {
                 p0_aval *= aval;
                 continue;
             }
             p1_aval *= aval;
-;
         }
     }
 

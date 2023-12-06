@@ -44,27 +44,23 @@ Coord BadCpuPlayer::choseSquare(const Game& game) {
 }
 
 CpuPlayer::CpuPlayer(char p): Player(p){
-    // extremidades tem valor 2
-    // casas que precedem uma extremidade tem valor 0.5 pois possibilitam ao adversário acessar a extremidade
-    // centro tem valor aumentado
-
-    aval_rows[0] = 5;
+    aval_rows[0] = 2.5;
     aval_rows[1] = 0.5;
     aval_rows[2] = 1;
     aval_rows[3] = 1.5;
     aval_rows[4] = 1.5;
     aval_rows[5] = 1;
     aval_rows[6] = 0.5;
-    aval_rows[7] = 5;
+    aval_rows[7] = 2.5;
 
-    aval_cols[0] = 5;
+    aval_cols[0] = 2.5;
     aval_cols[1] = 0.5;
     aval_cols[2] = 1;
     aval_cols[3] = 1.5;
     aval_cols[4] = 1.5;
     aval_cols[5] = 1;
     aval_cols[6] = 0.5;
-    aval_cols[7] = 5;
+    aval_cols[7] = 2.5;
 }
 
 Coord CpuPlayer::choseSquare(const Game& game) {
