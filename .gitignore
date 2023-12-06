@@ -1,3 +1,5 @@
 src/main
 build/*
 reference.c
+out.txt
+
