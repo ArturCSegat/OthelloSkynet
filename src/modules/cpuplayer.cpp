@@ -10,7 +10,7 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 10
+#define MAX_DEPTH 8
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -243,7 +243,6 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     float aval;
     int r = game.play(move);
 
-
     if (r == -2 || depth == MAX_DEPTH) {
         return game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
     }
@@ -262,11 +261,10 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
             }
             
             if (beta <= alpha) {
-                goto exit;
+                return max_aval;
             }
         }
     }
-    exit:
     return max_aval;
 }
 
@@ -275,7 +273,7 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     // std::cout << "Min: move: " << move.toString() << ", depth: " << depth << "\n";
 
     // std::cout << "Min turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
-    float max_aval = 9999999;
+    float min_aval = 9999999;
     float aval;
     int r = game.play(move);
 
@@ -291,16 +289,15 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
             }
             aval = Max(game, Coord{i, j}, alpha, beta, depth + 1);
             game.undo();
-            if (aval < max_aval) {
-                max_aval = aval;
+            if (aval < min_aval) {
+                min_aval = aval;
             }
             
             beta = std::min(beta, aval);
             if (beta <= alpha) {
-                goto exit;
+                return min_aval;
             }
         }
     }
-    exit:
-    return max_aval;
+    return min_aval;
 }

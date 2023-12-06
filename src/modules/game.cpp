@@ -166,10 +166,10 @@ float Game::playerAval(float * aval_rows, float * aval_cols) {
             }
 
             if (space == this->players[0]->piece) {
-                p0_aval *= aval;
+                p0_aval += aval;
                 continue;
             }
-            p1_aval *= aval;
+            p1_aval += aval;
         }
     }
 
