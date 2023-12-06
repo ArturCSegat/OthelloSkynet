@@ -11,7 +11,7 @@ Player::Player(char p) {
 }
 
 // in this class the game parameter is useless, only required by the CpuPlayer sub-class
-Coord Player::choseSquare(const Game& game) {
+Coord Player::choseSquare(Game& game) {
     std::cout << "enter thee coords, player: " << piece << "\n";
     int i, j;
     scanf("%d %d", &i, &j);

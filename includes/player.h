@@ -16,7 +16,7 @@ public:
     Player(char p);
     virtual ~Player() = default;
 
-    virtual Coord choseSquare(const Game& game);
+    virtual Coord choseSquare(Game& game);
 };
 
 #endif

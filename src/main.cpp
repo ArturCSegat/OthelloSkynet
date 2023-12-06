@@ -7,7 +7,7 @@
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('o'));
+    auto p1 = std::make_unique<CpuPlayer>(CpuPlayer('o'));
     auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('x'));
 
     auto g = Game(std::move(p1), std::move(p2), ' ');
@@ -17,6 +17,11 @@ int main() {
         g.printPlayerInfo();
 
         Coord move = g.players[g.curr_idx]->choseSquare(g);
+
+        if (move == Coord{-3, -3}) {
+            g.undo();
+            continue;
+        }
 
         int fliped;
 
@@ -37,6 +42,11 @@ int main() {
         g.printPlayerInfo();
 
         Coord cpu_move = g.players[g.curr_idx]->choseSquare(g);
+
+        if (cpu_move == Coord{-3, -3}) {
+            g.undo();
+            continue;
+        }
 
         if(cpu_move == move) {
             std::cout << "Both skipped, no more moves availabe\n";

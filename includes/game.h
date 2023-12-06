@@ -5,12 +5,14 @@
 #include "board.h"
 #include "player.h"
 #include <memory>
+#include <stack>
 
 #define GAME_H
 class Game {
 public:
     Board board;
     std::unique_ptr<Player> players[2];
+    std::stack<std::vector<Coord>> flips;
     int curr_idx;
     bool running;
 
@@ -19,6 +21,7 @@ public:
     std::vector<Coord> flipedFromMove(Coord move, int player_idx) const;
 
     int play(Coord c);
+    void undo();
 
     std::unique_ptr<Game> clone() const;
 

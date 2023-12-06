@@ -10,11 +10,11 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 6
+#define MAX_DEPTH 2
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
-Coord BadCpuPlayer::choseSquare(const Game& game) {
+Coord BadCpuPlayer::choseSquare(Game& game) {
     std::map<int, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -63,7 +63,7 @@ CpuPlayer::CpuPlayer(char p): Player(p){
     aval_cols[7] = 2.5;
 }
 
-Coord CpuPlayer::choseSquare(const Game& game) {
+Coord CpuPlayer::choseSquare(Game& game) {
     std::map<float, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -95,7 +95,7 @@ Coord CpuPlayer::choseSquare(const Game& game) {
 
 BetterCpuPlayer::BetterCpuPlayer(char p) : CpuPlayer(p) {};
 
-Coord BetterCpuPlayer::choseSquare(const Game& game) {
+Coord BetterCpuPlayer::choseSquare(Game& game) {
     std::map<float, Coord> moves;
     int c = 0;
     for (int i = 0; i < 8; i++) {
@@ -146,7 +146,7 @@ int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game)
 
 MaybeEvenBetterCpuPlayer::MaybeEvenBetterCpuPlayer(char p) : BetterCpuPlayer(p) {};
 
-Coord MaybeEvenBetterCpuPlayer::choseSquare(const Game& game) {
+Coord MaybeEvenBetterCpuPlayer::choseSquare(Game& game) {
     std::map<int, Coord> moves;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -195,9 +195,12 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
 
 MinMaxCpuPlayer::MinMaxCpuPlayer(char p) : BetterCpuPlayer(p) {};
 
-Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
+Coord MinMaxCpuPlayer::choseSquare(Game& game) {
     float max_aval = -9999999;
     auto max_move = Coord{-1, -1};
+    
+    auto p1 = game.players[0]->piece_count;
+    auto p2 = game.players[1]->piece_count;
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -206,14 +209,25 @@ Coord MinMaxCpuPlayer::choseSquare(const Game& game) {
                 continue;
             }
             
-            auto clone = game.clone();
-            float fit = Max(*clone, Coord{i, j}, -999, 999, 0);
+            float fit = Max(game, Coord{i, j}, -999, 999, 0);
+            game.undo();
 
             if (fit > max_aval) {
                 max_aval = fit;
                 max_move = Coord{i, j};
             }
         }
+    }
+
+    auto p12 = game.players[0]->piece_count;
+    auto p22 = game.players[1]->piece_count;
+    
+    if (p1 != p12 || p2 != p22) {
+        std::cout << "\nfuck\n";
+        std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
+        std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
+        std::cout << "\nfuck\n";
+        exit(1);
     }
 
     return max_move;
@@ -227,6 +241,7 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     float aval;
     int r = game.play(move);
 
+
     if (r == -2 || depth == MAX_DEPTH) {
         return game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
     }
@@ -237,17 +252,19 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
-            aval = Min(*game.clone(), Coord{i, j}, alpha, beta, depth + 1);
+            aval = Min(game, Coord{i, j}, alpha, beta, depth + 1);
+            game.undo();
             alpha = std::max(alpha, aval);
             if (aval > max_aval) {
                 max_aval = aval;
             }
             
             if (beta <= alpha) {
-                break;
+                goto exit;
             }
         }
     }
+    exit:
     return max_aval;
 }
 
@@ -270,16 +287,18 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
-            aval = Max(*game.clone(), Coord{i, j}, alpha, beta, depth + 1);
+            aval = Max(game, Coord{i, j}, alpha, beta, depth + 1);
+            game.undo();
             if (aval < max_aval) {
                 max_aval = aval;
             }
             
             beta = std::min(beta, aval);
             if (beta <= alpha) {
-                break;
+                goto exit;
             }
         }
     }
+    exit:
     return max_aval;
 }

@@ -2,6 +2,7 @@
 #include "../../includes/game.h"
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <math.h>
 
 Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square) {
@@ -54,6 +55,8 @@ int Game::play(Coord c) {
         return 0;
     }
 
+    // std::cout << "played: " << c.toString() << "\n";
+
     for (const Coord &c: to_flip) {
         board[c] = players[curr_idx]->piece;
     }
@@ -69,7 +72,32 @@ int Game::play(Coord c) {
         return -2;
     }
 
-    return to_flip.size();
+    to_flip.push_back(c);
+    this->flips.push(to_flip);
+
+    return to_flip.size() - 1;
+}
+
+void Game::undo() {
+    auto did = this->flips.top();
+    this->flips.pop();
+
+    Coord played = did[did.size() - 1];
+
+    for (auto& c: did) {
+        this->board[c] = this->players[this->curr_idx]->piece;
+    }
+
+    this->players[this->curr_idx]->piece_count += did.size() - 1;
+    this->players[!this->curr_idx]->piece_count -= did.size() - 1;
+    this->players[!this->curr_idx]->play_count --;
+
+    this->board[played] = this->board.empty_square_marker;
+    this->players[!this->curr_idx]->piece_count --;
+
+    this->curr_idx =! this->curr_idx;
+
+    // std::cout << "undone: " << played.toString() << "\n";
 }
 
 std::unique_ptr<Game> Game::clone() const{
