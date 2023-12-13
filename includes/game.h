@@ -11,9 +11,11 @@
 class Game {
 public:
     Board board;
+    int age_matrix[8][8];
     std::unique_ptr<Player> players[2];
     std::stack<std::vector<Coord>> flips;
     int curr_idx;
+    int play_count;
     bool running;
 
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
@@ -30,7 +32,7 @@ public:
     void printPlayerInfo();
 
     // returns the avaliation of a givenn player
-    float playerAval(float * aval_rows, float * aval_cols);
+    float playerAval(float aval_matrix[8][8]);
 };
 
 #endif

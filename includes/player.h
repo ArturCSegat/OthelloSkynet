@@ -11,8 +11,7 @@ class Player {
 public:
     char piece;
     int piece_count;
-    int play_count;
-
+ 
     Player(char p);
     virtual ~Player() = default;
 

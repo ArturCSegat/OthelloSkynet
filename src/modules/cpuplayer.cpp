@@ -10,7 +10,7 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 8
+#define MAX_DEPTH 7
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -43,25 +43,7 @@ Coord BadCpuPlayer::choseSquare(Game& game) {
 
 }
 
-CpuPlayer::CpuPlayer(char p): Player(p){
-    aval_rows[0] = 2.5;
-    aval_rows[1] = 0.5;
-    aval_rows[2] = 1;
-    aval_rows[3] = 1.5;
-    aval_rows[4] = 1.5;
-    aval_rows[5] = 1;
-    aval_rows[6] = 0.5;
-    aval_rows[7] = 2.5;
-
-    aval_cols[0] = 2.5;
-    aval_cols[1] = 0.5;
-    aval_cols[2] = 1;
-    aval_cols[3] = 1.5;
-    aval_cols[4] = 1.5;
-    aval_cols[5] = 1;
-    aval_cols[6] = 0.5;
-    aval_cols[7] = 2.5;
-}
+CpuPlayer::CpuPlayer(char p) : Player(p) {}
 
 Coord CpuPlayer::choseSquare(Game& game) {
     std::map<float, Coord> moves;
@@ -76,8 +58,8 @@ Coord CpuPlayer::choseSquare(Game& game) {
             }
             
             float positional_factor = 1.5 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(2-1.5))); 
-            positional_factor = 2;
-            float fit = std::pow((aval_rows[i] * aval_cols[j]), positional_factor) + flipped;
+            // positional_factor = 2;
+            float fit = std::pow(aval_matrix[i][j], positional_factor) + flipped;
 
             moves[fit] = Coord{i, j};
         }
@@ -209,8 +191,10 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
             auto p1 = game.players[0]->piece_count;
             auto p2 = game.players[1]->piece_count;
 
-            float fit = Max(game, Coord{i, j}, -999, 999, 0);
+            float fit = Min(game, Coord{i, j}, -999, 999, 0);
             game.undo();
+
+            std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
 
             auto p12 = game.players[0]->piece_count;
             auto p22 = game.players[1]->piece_count;
@@ -231,7 +215,6 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
         }
     }
 
-
     return max_move;
 }
 
@@ -244,7 +227,7 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     int r = game.play(move);
 
     if (r == -2 || depth == MAX_DEPTH) {
-        return game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
+        return game.playerAval(CpuPlayer::aval_matrix);
     }
 
     for (int i = 0; i < 8; i++) {
@@ -278,7 +261,7 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     int r = game.play(move);
 
     if (r == -2 || depth == MAX_DEPTH) {
-        return game.playerAval(CpuPlayer::aval_rows, CpuPlayer::aval_cols);
+        return game.playerAval(CpuPlayer::aval_matrix);
     }
 
     for (int i = 0; i < 8; i++) {

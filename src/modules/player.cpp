@@ -7,7 +7,6 @@
 Player::Player(char p) {
     piece = p;
     piece_count = 0;
-    play_count = 0;
 }
 
 // in this class the game parameter is useless, only required by the CpuPlayer sub-class

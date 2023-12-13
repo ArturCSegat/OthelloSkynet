@@ -39,7 +39,6 @@ int Game::play(Coord c) {
     Coord pass = Coord{-1, -1};
 
     if (c == pass) {
-        players[curr_idx]->play_count++;
         curr_idx = !curr_idx;
         return -1;
     }
@@ -56,15 +55,21 @@ int Game::play(Coord c) {
     }
 
     // std::cout << "played: " << c.toString() << "\n";
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            age_matrix[i][j] += 1;
+        }
+    }
 
     for (const Coord &c: to_flip) {
         board[c] = players[curr_idx]->piece;
+        age_matrix[c.row][c.col] = 0;
     }
+    this->play_count ++;
 
     board[c] = players[curr_idx]->piece;
     players[!curr_idx]->piece_count -= to_flip.size();
     players[curr_idx]->piece_count += to_flip.size() + 1;
-    players[curr_idx]->play_count++;
     curr_idx = !curr_idx;
 
     if (players[0]->piece_count + players[1]->piece_count == 64 || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
@@ -87,11 +92,11 @@ void Game::undo() {
 
     for (auto& c: did) {
         this->board[c] = this->players[this->curr_idx]->piece;
+        age_matrix[c.row][c.col] = 10; // bigger then cpuplayer's MAX DETPH
     }
 
     this->players[this->curr_idx]->piece_count += did.size() - 1;
     this->players[!this->curr_idx]->piece_count -= did.size();
-    this->players[!this->curr_idx]->play_count --;
 
     this->board[played] = this->board.empty_square_marker;
 
@@ -103,10 +108,8 @@ void Game::undo() {
 std::unique_ptr<Game> Game::clone() const{
     auto p1 = std::make_unique<Player>(Player(players[0]->piece));
     p1->piece_count = players[0]->piece_count;
-    p1->play_count = players[0]->play_count;
     auto p2 =  std::make_unique<Player>(Player(players[1]->piece));
     p2->piece_count = players[1]->piece_count;
-    p2->play_count = players[1]->play_count;
     char df = board.empty_square_marker;
 
     auto g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), df));
@@ -143,26 +146,50 @@ void Game::printPlayerInfo(){
     std::cout << "player " << players[1]->piece << ": " << players[1]->piece_count << "\n";
 }
 
-float Game::playerAval(float * aval_rows, float * aval_cols) {
+float Game::playerAval(float aval_matrix[8][8]) {
     float p0_aval = 1;
     float p1_aval = 1;
     float aval;
+    
+    std::vector<float> modifiers;
+    std::vector<char> list;
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             char space = this->board[Coord{i, j}];
 
-            if (space == this->board.empty_square_marker) {
+            if (space == this->board.empty_square_marker ||
+                this->age_matrix[i][j] > 7
+                ) {
                 continue;
             }
 
-            if ((Coord{i, j} == Coord{0, 0}) ||
+            aval = aval_matrix[i][j] * (9 - (age_matrix[i][j] + 1));
+
+            if ((Coord{i, j} == Coord{1, 6}) ||
+                (Coord{i, j} == Coord{1, 1}) ||
+                (Coord{i, j} == Coord{6, 1}) ||
+                (Coord{i, j} == Coord{6, 6}) ||
+
+                (Coord{i, j} == Coord{0, 0}) ||
                 (Coord{i, j} == Coord{0, 7}) ||
                 (Coord{i, j} == Coord{7, 0}) ||
-                (Coord{i, j} == Coord{7, 7})) {
-                aval = pow((aval_rows[i] * aval_cols[j]), 3);
-            } else {
-                aval = (aval_rows[i] * aval_cols[j]);
+                (Coord{i, j} == Coord{0, 1}) ||
+
+                (Coord{i, j} == Coord{0, 1}) ||
+                (Coord{i, j} == Coord{0, 6}) ||
+                (Coord{i, j} == Coord{1, 0}) ||
+                (Coord{i, j} == Coord{1, 7}) ||
+
+                (Coord{i, j} == Coord{6, 0}) ||
+                (Coord{i, j} == Coord{6, 7}) ||
+
+                (Coord{i, j} == Coord{7, 1}) ||
+                (Coord{i, j} == Coord{7, 6})) {
+                
+                modifiers.push_back(pow(aval, 3));
+                list.push_back(space);
+                continue;
             }
 
             if (space == this->players[0]->piece) {
@@ -173,5 +200,19 @@ float Game::playerAval(float * aval_rows, float * aval_cols) {
         }
     }
 
+    int i = 0;
+    for (auto &m: modifiers) {
+        if(list[i] == this->players[0]->piece) {
+            p0_aval *= m;
+            continue;
+        }
+        p1_aval *= m;
+        i++;
+    }
+
     return p1_aval - p0_aval;
 }
+
+
+
+
