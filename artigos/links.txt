@@ -1,0 +1,7 @@
+https://towardsdatascience.com/monte-carlo-tree-search-an-introduction-503d8c04e168
+
+https://medium.com/@_michelangelo_/monte-carlo-tree-search-mcts-algorithm-for-dummies-74b2bae53bfa
+
+https://mcts.ai/
+
+https://www.analyticsvidhya.com/blog/2019/01/monte-carlo-tree-search-introduction-algorithm-deepmind-alphago/#h-monte-carlo-tree-search
