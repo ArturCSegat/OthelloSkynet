@@ -7,10 +7,10 @@
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('o'));
+    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o'));
     auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('x'));
 
-    auto g = Game(std::move(p1), std::move(p2), ' ');
+    auto g = Game(std::move(p2), std::move(p1), ' ');
 
     while(g.running) {
         g.board.display();

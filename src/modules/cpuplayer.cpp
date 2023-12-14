@@ -10,7 +10,7 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 7
+#define MAX_DEPTH 5
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -178,7 +178,47 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
 MinMaxCpuPlayer::MinMaxCpuPlayer(char p) : BetterCpuPlayer(p) {};
 
 Coord MinMaxCpuPlayer::choseSquare(Game& game) {
-    float max_aval = -9999999;
+    int this_idx = game.players[1]->piece == this->piece;
+    if (this_idx == 1) {
+        float max_aval = -9999999;
+        auto max_move = Coord{-1, -1};
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                        || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
+                    continue;
+                }
+
+                auto p1 = game.players[0]->piece_count;
+                auto p2 = game.players[1]->piece_count;
+
+                float fit = Min(game, Coord{i, j}, -999, 999, 0);
+                game.undo();
+
+                std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
+
+                auto p12 = game.players[0]->piece_count;
+                auto p22 = game.players[1]->piece_count;
+
+                if (p1 != p12 || p2 != p22) {
+                    std::cout << "\nerror\n\n";
+                    std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
+                    std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
+                    std::cout << "\nerror\n\n";
+                    std::cout << "last failed coordinate: " << Coord{i, j}.toString() << "\n";
+                    exit(1);
+                }
+
+                if (fit > max_aval) {
+                    max_aval = fit;
+                    max_move = Coord{i, j};
+                }
+            }
+        }
+        return max_move;
+    }
+    float max_aval = 9999999;
     auto max_move = Coord{-1, -1};
 
     for (int i = 0; i < 8; i++) {
@@ -187,11 +227,11 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
             }
-            
+
             auto p1 = game.players[0]->piece_count;
             auto p2 = game.players[1]->piece_count;
 
-            float fit = Min(game, Coord{i, j}, -999, 999, 0);
+            float fit = Max(game, Coord{i, j}, -999, 999, 0);
             game.undo();
 
             std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
@@ -208,13 +248,12 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
                 exit(1);
             }
 
-            if (fit > max_aval) {
+            if (fit < max_aval) {
                 max_aval = fit;
                 max_move = Coord{i, j};
             }
         }
     }
-
     return max_move;
 }
 
