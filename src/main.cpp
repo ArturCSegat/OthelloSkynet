@@ -26,7 +26,8 @@ float aval(const Game& game, float aval_matrix[8][8]) {
 
             aval = aval_matrix[i][j] * (9 - (game.age_matrix[i][j] + 1));
 
-            if ((Coord{i, j} == Coord{1, 6}) ||
+            if (
+                (Coord{i, j} == Coord{1, 6}) ||
                 (Coord{i, j} == Coord{1, 1}) ||
                 (Coord{i, j} == Coord{6, 1}) ||
                 (Coord{i, j} == Coord{6, 6}) ||
@@ -34,7 +35,7 @@ float aval(const Game& game, float aval_matrix[8][8]) {
                 (Coord{i, j} == Coord{0, 0}) ||
                 (Coord{i, j} == Coord{0, 7}) ||
                 (Coord{i, j} == Coord{7, 0}) ||
-                (Coord{i, j} == Coord{0, 1}) ||
+                (Coord{i, j} == Coord{7, 7}) ||
 
                 (Coord{i, j} == Coord{0, 1}) ||
                 (Coord{i, j} == Coord{0, 6}) ||
@@ -45,7 +46,8 @@ float aval(const Game& game, float aval_matrix[8][8]) {
                 (Coord{i, j} == Coord{6, 7}) ||
 
                 (Coord{i, j} == Coord{7, 1}) ||
-                (Coord{i, j} == Coord{7, 6})) {
+                (Coord{i, j} == Coord{7, 6})
+                ) {
                 
                 modifiers.push_back(pow(aval, 3));
                 list.push_back(space);
@@ -77,6 +79,8 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
     float p0_aval = 1;
     float p1_aval = 1;
     float aval;
+    int count0 = 0;
+    int count1 = 0;
     
     std::vector<float> modifiers;
     std::vector<char> list;
@@ -85,14 +89,16 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
         for (int j = 0; j < 8; j++) {
             char space = game.board[Coord{i, j}];
 
-            if (space == game.board.empty_square_marker
+            if (space == game.board.empty_square_marker ||
+                game.age_matrix[i][j] > 7
                 ) {
                 continue;
             }
 
-            aval = aval_matrix[i][j];
+            aval = aval_matrix[i][j] * (9 - (game.age_matrix[i][j] + 1));
 
-            if ((Coord{i, j} == Coord{1, 6}) ||
+            if (
+                (Coord{i, j} == Coord{1, 6}) ||
                 (Coord{i, j} == Coord{1, 1}) ||
                 (Coord{i, j} == Coord{6, 1}) ||
                 (Coord{i, j} == Coord{6, 6}) ||
@@ -100,7 +106,7 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
                 (Coord{i, j} == Coord{0, 0}) ||
                 (Coord{i, j} == Coord{0, 7}) ||
                 (Coord{i, j} == Coord{7, 0}) ||
-                (Coord{i, j} == Coord{0, 1}) ||
+                (Coord{i, j} == Coord{7, 7}) ||
 
                 (Coord{i, j} == Coord{0, 1}) ||
                 (Coord{i, j} == Coord{0, 6}) ||
@@ -111,7 +117,8 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
                 (Coord{i, j} == Coord{6, 7}) ||
 
                 (Coord{i, j} == Coord{7, 1}) ||
-                (Coord{i, j} == Coord{7, 6})) {
+                (Coord{i, j} == Coord{7, 6})
+                ) {
                 
                 modifiers.push_back(pow(aval, 3));
                 list.push_back(space);
@@ -120,9 +127,11 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
 
             if (space == game.players[0]->piece) {
                 p0_aval += aval;
+                count0 ++;
                 continue;
             }
             p1_aval += aval;
+            count1 ++;
         }
     }
 
@@ -141,8 +150,8 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval2));
-    auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('x', aval));
+    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval));
+    auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('x', aval2));
 
     auto g = Game(std::move(p2), std::move(p1), ' ');
 
