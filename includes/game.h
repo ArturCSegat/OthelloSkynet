@@ -30,9 +30,6 @@ public:
     void endGame();
 
     void printPlayerInfo();
-
-    // returns the avaliation of a givenn player
-    float playerAval(float aval_matrix[8][8]);
 };
 
 #endif

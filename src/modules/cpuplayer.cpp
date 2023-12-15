@@ -175,12 +175,14 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     return aval_sum;
 }
 
-MinMaxCpuPlayer::MinMaxCpuPlayer(char p) : BetterCpuPlayer(p) {};
+MinMaxCpuPlayer::MinMaxCpuPlayer(char p, float(*aval)(const Game& game, float aval_matrix[8][8])) : BetterCpuPlayer(p) { 
+    this->aval = aval;
+};
 
 Coord MinMaxCpuPlayer::choseSquare(Game& game) {
     int this_idx = game.players[1]->piece == this->piece;
     if (this_idx == 1) {
-        float max_aval = -9999999;
+        float max_aval = MAXFLOAT  * -1;
         auto max_move = Coord{-1, -1};
 
         for (int i = 0; i < 8; i++) {
@@ -193,7 +195,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
                 auto p1 = game.players[0]->piece_count;
                 auto p2 = game.players[1]->piece_count;
 
-                float fit = Min(game, Coord{i, j}, -999, 999, 0);
+                float fit = Min(game, Coord{i, j}, MAXFLOAT * -1, MAXFLOAT, 0);
                 game.undo();
 
                 std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
@@ -218,7 +220,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
         }
         return max_move;
     }
-    float max_aval = 9999999;
+    float max_aval = MAXFLOAT;
     auto max_move = Coord{-1, -1};
 
     for (int i = 0; i < 8; i++) {
@@ -231,7 +233,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
             auto p1 = game.players[0]->piece_count;
             auto p2 = game.players[1]->piece_count;
 
-            float fit = Max(game, Coord{i, j}, -999, 999, 0);
+            float fit = Max(game, Coord{i, j}, MAXFLOAT * -1, MAXFLOAT, 0);
             game.undo();
 
             std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
@@ -261,12 +263,12 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     // std::cout << "Max: move: " << move.toString() << ", depth: " << depth << "\n";
 
     // std::cout << "MAx turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
-    float max_aval = -9999999;
+    float max_aval = MAXFLOAT * -1;
     float aval;
     int r = game.play(move);
 
     if (r == -2 || depth == MAX_DEPTH) {
-        return game.playerAval(CpuPlayer::aval_matrix);
+        return this->aval(game, CpuPlayer::aval_matrix);
     }
 
     for (int i = 0; i < 8; i++) {
@@ -295,12 +297,12 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     // std::cout << "Min: move: " << move.toString() << ", depth: " << depth << "\n";
 
     // std::cout << "Min turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
-    float min_aval = 9999999;
+    float min_aval = MAXFLOAT;
     float aval;
     int r = game.play(move);
 
     if (r == -2 || depth == MAX_DEPTH) {
-        return game.playerAval(CpuPlayer::aval_matrix);
+        return this->aval(game, CpuPlayer::aval_matrix);
     }
 
     for (int i = 0; i < 8; i++) {
