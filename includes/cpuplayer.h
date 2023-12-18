@@ -51,9 +51,10 @@ private:
 
 class MinMaxCpuPlayer : public BetterCpuPlayer {
 public:
-    MinMaxCpuPlayer(char p, float(*aval)(const Game& game, float aval_matrix[8][8]));
+    MinMaxCpuPlayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth);
     ~MinMaxCpuPlayer() override = default;
-    float(*aval)(const Game& game, float aval_matrix[8][8]);
+    float(*aval)(const Game& game, const MinMaxCpuPlayer *const self); // custom heuristic
+    int max_depth;
 
     Coord choseSquare(Game& game) override;
 private:

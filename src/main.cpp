@@ -6,7 +6,7 @@
 #include <chrono>
 #include <thread>
 
-float aval(const Game& game, float aval_matrix[8][8]) {
+float aval(const Game& game, const MinMaxCpuPlayer *const self) {
     float p0_aval = 1;
     float p1_aval = 1;
     float aval;
@@ -19,12 +19,12 @@ float aval(const Game& game, float aval_matrix[8][8]) {
             char space = game.board[Coord{i, j}];
 
             if (space == game.board.empty_square_marker ||
-                game.age_matrix[i][j] > 7
+                game.age_matrix[i][j] > self->max_depth
                 ) {
                 continue;
             }
 
-            aval = aval_matrix[i][j] * (9 - (game.age_matrix[i][j] + 1));
+            aval = self->aval_matrix[i][j] * (9 - (game.age_matrix[i][j] + 1));
 
             if (
                 (Coord{i, j} == Coord{1, 6}) ||
@@ -75,7 +75,7 @@ float aval(const Game& game, float aval_matrix[8][8]) {
     return p1_aval - p0_aval;
 }
 
-float aval2(const Game& game, float aval_matrix[8][8]) {
+float aval2(const Game& game, const MinMaxCpuPlayer *const self) {
     float p0_aval = 1;
     float p1_aval = 1;
     float aval;
@@ -90,12 +90,12 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
             char space = game.board[Coord{i, j}];
 
             if (space == game.board.empty_square_marker ||
-                game.age_matrix[i][j] > 7
+                game.age_matrix[i][j] > self->max_depth
                 ) {
                 continue;
             }
 
-            aval = aval_matrix[i][j] * (9 - (game.age_matrix[i][j] + 1));
+            aval = self->aval_matrix[i][j] * (9 - (game.age_matrix[i][j] + 1));
 
             if (
                 (Coord{i, j} == Coord{1, 6}) ||
@@ -150,8 +150,8 @@ float aval2(const Game& game, float aval_matrix[8][8]) {
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval));
-    auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('x', aval2));
+    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, 6));
+    auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('x', aval2, 6));
 
     auto g = Game(std::move(p2), std::move(p1), ' ');
 

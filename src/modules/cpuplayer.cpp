@@ -10,8 +10,6 @@
 #include <thread>
 #include <chrono>
 
-#define MAX_DEPTH 5
-
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
 Coord BadCpuPlayer::choseSquare(Game& game) {
@@ -175,8 +173,9 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     return aval_sum;
 }
 
-MinMaxCpuPlayer::MinMaxCpuPlayer(char p, float(*aval)(const Game& game, float aval_matrix[8][8])) : BetterCpuPlayer(p) { 
+MinMaxCpuPlayer::MinMaxCpuPlayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth) : BetterCpuPlayer(p) { 
     this->aval = aval;
+    this->max_depth = max_depth;
 };
 
 Coord MinMaxCpuPlayer::choseSquare(Game& game) {
@@ -267,8 +266,8 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     float aval;
     int r = game.play(move);
 
-    if (r == -2 || depth == MAX_DEPTH) {
-        return this->aval(game, CpuPlayer::aval_matrix);
+    if (r == -2 || depth == this->max_depth) {
+        return this->aval(game, this);
     }
 
     for (int i = 0; i < 8; i++) {
@@ -301,8 +300,8 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     float aval;
     int r = game.play(move);
 
-    if (r == -2 || depth == MAX_DEPTH) {
-        return this->aval(game, CpuPlayer::aval_matrix);
+    if (r == -2 || depth == this->max_depth) {
+        return this->aval(game, this);
     }
 
     for (int i = 0; i < 8; i++) {
