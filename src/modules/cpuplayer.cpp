@@ -1,21 +1,19 @@
 #include "../../includes/cpuplayer.h"
 #include "../../includes/game.h"
-#include <algorithm>
 #include <cmath>
-#include <ctime>
-#include <stdlib.h>
 #include <map>
 #include <memory>
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <iomanip>
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
 Coord BadCpuPlayer::choseSquare(Game& game) {
     std::map<int, Coord> moves;
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker) {
                 continue;
             }
@@ -41,12 +39,117 @@ Coord BadCpuPlayer::choseSquare(Game& game) {
 
 }
 
-CpuPlayer::CpuPlayer(char p) : Player(p) {}
+
+CpuPlayer::CpuPlayer(char p) : Player(p) {
+    int bg_idx = GAME_N - 1;
+    // 8x8
+    // { 10000.0f, 0.25f, 15.0f, 3.75f, 3.75f, 2.50f, 0.25f, 10000.0f },
+    // { 0.25f, 0.25f, 0.50f, 0.75f, 0.75f, 0.50f, 0.25f, 0.25f },
+    // { 15.0f, 0.50f, 5.00f, 5.00f, 5.00f, 5.00f, 0.50f, 15.0f },
+    // { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f, 0.75f, 15.0f },
+    // { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f, 0.75f, 15.0f },
+    // { 15.0f, 0.50f, 5.00f, 5.50f, 5.50f, 5.00f, 0.50f, 15.0f },
+    // { 0.25f, 0.25f, 0.50f, 0.75f, 0.75f, 0.50f, 0.25f, 0.25f },
+    // { 10000.0f, 0.25f, 15.0f, 15.0f, 15.0f, 15.0f, 0.25f, 10000.0f },
+    
+    // 6x6
+    // { 10000.0f, 0.25f, 15.0f, 3.75f, 0.25f, 1000.0f},
+    // { 0.25f, 0.25f, 0.50f, 0.75f, 0.25f, 0.25f},
+    // { 15.0f, 0.50f, 5.00f, 5.00f, 5.00f, 5.00f},
+    // { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f},
+    // { 0.25f, 0.25f, 5.00f, 15.0f, 0.25f, 0.25f},
+    // { 10000.0f, 0.25f, 15.0f, 3.75f, 0.25f, 1000.0f},
+    
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
+            aval_matrix[i][j] = 10;
+        }
+    }
+
+    int mid_sm_idx = (GAME_N - 1) / 2;
+    int mid_bg_idx = mid_sm_idx + 1;
+
+    aval_matrix[mid_sm_idx][mid_sm_idx] = 15;
+    aval_matrix[mid_bg_idx][mid_bg_idx] = 15;
+    aval_matrix[mid_sm_idx][mid_bg_idx] = 15;
+    aval_matrix[mid_bg_idx][mid_sm_idx] = 15;
+
+    // generate rings
+    float bg_val = 5;
+    float sm_val = 0;
+    int i = 0;
+    for (;i < (GAME_N) / 2; i ++) {
+        // good ring
+        aval_matrix[i][0] = bg_val;
+        aval_matrix[i][bg_idx] = bg_val;
+        aval_matrix[0][i] = bg_val;
+        aval_matrix[bg_idx][i] = bg_val;
+
+        // bad ring
+        aval_matrix[i][1] = sm_val;
+        aval_matrix[i][bg_idx - 1] = sm_val;
+        aval_matrix[1][i] = sm_val;
+        aval_matrix[bg_idx - 1][i] = sm_val;
+
+        sm_val += 0.25;
+        bg_val += 5;
+    }
+    
+    // mirrored opposite
+    for (; i < GAME_N; i ++) {
+        sm_val -= 0.25;
+        bg_val -= 5;
+
+        // good ring
+        aval_matrix[i][0] = bg_val;
+        aval_matrix[i][bg_idx] = bg_val;
+        aval_matrix[0][i] = bg_val;
+        aval_matrix[bg_idx][i] = bg_val;
+
+        // bad ring
+        aval_matrix[i][1] = sm_val;
+        aval_matrix[i][bg_idx - 1] = sm_val;
+        aval_matrix[1][i] = sm_val;
+        aval_matrix[bg_idx - 1][i] = sm_val;
+    }
+
+    
+    // modifiers
+    aval_matrix[0][0] = 100.0;
+    aval_matrix[0][bg_idx] = 100.0;
+    aval_matrix[bg_idx][0] = 100.0;
+    aval_matrix[bg_idx][bg_idx] = 100.0;
+    
+    aval_matrix[0][1] = 0.25;
+    aval_matrix[1][0] = 0.25;
+    aval_matrix[1][1] = 0.25;
+
+    aval_matrix[0][bg_idx - 1] = 0.25;
+    aval_matrix[1][bg_idx] = 0.25;
+    aval_matrix[1][bg_idx - 1] = 0.25;
+
+    aval_matrix[bg_idx - 1][0] = 0.25;
+    aval_matrix[bg_idx][1] = 0.25;
+    aval_matrix[bg_idx - 1][1] = 0.25;
+
+    aval_matrix[bg_idx][bg_idx - 1] = 0.25;
+    aval_matrix[bg_idx - 1][bg_idx - 1] = 0.25;
+    aval_matrix[bg_idx - 1][bg_idx] = 0.25;
+
+    // for (int i = 0; i < GAME_N; i++) {
+    //     for (int j = 0; j < GAME_N; j++) {
+    //         // Add preceding zeros using setfill and setw
+    //         std::cout << std::fixed << std::setprecision(2) << std::setfill('0') << std::setw(6) << std::right << aval_matrix[i][j] << " ";
+    //     }
+    //     std::cout << "\n";
+    // }
+    // exit(2);
+}
 
 Coord CpuPlayer::choseSquare(Game& game) {
     std::map<float, Coord> moves;
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker){
                 continue;
             }
@@ -74,12 +177,11 @@ Coord CpuPlayer::choseSquare(Game& game) {
 
 
 BetterCpuPlayer::BetterCpuPlayer(char p) : CpuPlayer(p) {};
-
 Coord BetterCpuPlayer::choseSquare(Game& game) {
     std::map<float, Coord> moves;
     int c = 0;
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
@@ -128,8 +230,8 @@ MaybeEvenBetterCpuPlayer::MaybeEvenBetterCpuPlayer(char p) : BetterCpuPlayer(p) 
 
 Coord MaybeEvenBetterCpuPlayer::choseSquare(Game& game) {
     std::map<int, Coord> moves;
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
@@ -159,8 +261,8 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     
     int aval_sum;
     
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if(game->board[Coord{i, j}] != game->board.empty_square_marker
                     || game->flipedFromMove(Coord{i, j}, game->curr_idx).size() == 0) {
                 continue;
@@ -181,11 +283,11 @@ MinMaxCpuPlayer::MinMaxCpuPlayer(char p, float(*aval)(const Game& game, const Mi
 Coord MinMaxCpuPlayer::choseSquare(Game& game) {
     int this_idx = game.players[1]->piece == this->piece;
     if (this_idx == 1) {
-        float max_aval = MAXFLOAT  * -1;
+        float max_aval = MAXFLOAT * -1;
         auto max_move = Coord{-1, -1};
 
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 0; i < GAME_N; i++) {
+            for (int j = 0; j < GAME_N; j++) {
                 if (game.board[Coord{i, j}] != game.board.empty_square_marker
                         || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                     continue;
@@ -219,11 +321,11 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
         }
         return max_move;
     }
-    float max_aval = MAXFLOAT;
+    float max_aval = std::numeric_limits<float>::max();
     auto max_move = Coord{-1, -1};
 
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
@@ -270,8 +372,8 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
         return this->aval(game, this);
     }
 
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;
@@ -304,8 +406,8 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
         return this->aval(game, this);
     }
 
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
                     || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
                 continue;

@@ -11,7 +11,7 @@
 class Game {
 public:
     Board board;
-    int age_matrix[8][8];
+    int age_matrix[GAME_N][GAME_N];
     std::unique_ptr<Player> players[2];
     std::stack<std::vector<Coord>> flips;
     int curr_idx;

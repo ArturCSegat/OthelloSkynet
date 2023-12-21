@@ -6,10 +6,13 @@
 #include <math.h>
 
 Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square) {
-    board[Coord{3, 3}] = player1->piece;
-    board[Coord{4, 4}] = player1->piece;
-    board[Coord{3, 4}] = player2->piece;
-    board[Coord{4, 3}] = player2->piece;
+    int sm_idx = (GAME_N - 1) / 2;
+    int bg_idx = sm_idx + 1;
+
+    board[Coord{sm_idx, sm_idx}] = player1->piece;
+    board[Coord{bg_idx, bg_idx}] = player1->piece;
+    board[Coord{sm_idx, bg_idx}] = player2->piece;
+    board[Coord{bg_idx, sm_idx}] = player2->piece;
     player1->piece_count += 2;
     player2->piece_count += 2;
 
@@ -32,7 +35,7 @@ std::vector<Coord> Game::flipedFromMove(Coord move, int player) const{
 }
 
 int Game::play(Coord c) {
-    if (c.col < -1 || c.row < -1 || c.col > 7 || c.row > 7) {
+    if (c.col < -1 || c.row < -1 || c.col > GAME_N - 1 || c.row > GAME_N - 1) {
         return 0;
     }
 
@@ -55,8 +58,8 @@ int Game::play(Coord c) {
     }
 
     // std::cout << "played: " << c.toString() << "\n";
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             age_matrix[i][j] += 1;
         }
     }
@@ -72,7 +75,7 @@ int Game::play(Coord c) {
     players[curr_idx]->piece_count += to_flip.size() + 1;
     curr_idx = !curr_idx;
 
-    if (players[0]->piece_count + players[1]->piece_count == 64 || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
+    if (players[0]->piece_count + players[1]->piece_count == (GAME_N * GAME_N) || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
         to_flip.push_back(c);
         this->flips.push(to_flip);
         return -2;
@@ -114,8 +117,8 @@ std::unique_ptr<Game> Game::clone() const{
 
     auto g = std::make_unique<Game>(Game(std::move(p1), std::move(p2), df));
 
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
             g->board[Coord{i, j}] = board[Coord{i, j}];
         }
     }

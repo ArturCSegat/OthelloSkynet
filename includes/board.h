@@ -6,11 +6,12 @@
 #include <array>
 #include <memory>
 #include <vector>
+#define GAME_N 10
 
 class Board {
 public:
     // char board[8][8];
-    std::array<std::array<char, 8>, 8> board;
+    std::array<std::array<char, GAME_N>, GAME_N> board;
     char empty_square_marker;
 
     Board();
