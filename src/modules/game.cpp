@@ -21,6 +21,7 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
 
     curr_idx = 0;
     running = true;
+    play_count = 0;
 }
 
 std::vector<Coord> Game::flipedFromMove(Coord move, int player) const{
@@ -53,7 +54,7 @@ int Game::play(Coord c) {
 
     std::vector<Coord> to_flip = flipedFromMove(c, this->curr_idx);
 
-    if (to_flip.size() == 0) {
+    if (to_flip.empty()) {
         return 0;
     }
 
@@ -88,6 +89,10 @@ int Game::play(Coord c) {
 }
 
 void Game::undo() {
+    if (this->play_count == 0) {
+        return;
+    }
+
     auto did = this->flips.top();
     this->flips.pop();
 
@@ -104,6 +109,7 @@ void Game::undo() {
     this->board[played] = this->board.empty_square_marker;
 
     this->curr_idx =! this->curr_idx;
+    this->play_count --;
 
     // std::cout << "undone: " << played.toString() << "\n";
 }
@@ -145,6 +151,7 @@ void Game::endGame() {
 }
 
 void Game::printPlayerInfo(){
+    std::cout << "turn: " << players[curr_idx]->piece << "\n";
     std::cout << "player " << players[0]->piece << ": " << players[0]->piece_count << "\n";
     std::cout << "player " << players[1]->piece << ": " << players[1]->piece_count << "\n";
 }

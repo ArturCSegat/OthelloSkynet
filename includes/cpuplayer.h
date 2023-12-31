@@ -3,6 +3,8 @@
 
 #include "board.h"
 #include "game.h"
+#include <queue>
+#include <vector>
 
 class BadCpuPlayer: public Player {
 public:
@@ -15,16 +17,6 @@ public:
 class CpuPlayer: public Player {
 public:
     float aval_matrix[GAME_N][GAME_N];
-    //     = {
-    //     { 10000.0f, 0.25f, 15.0f, 3.75f, 3.75f, 2.50f, 0.25f, 10000.0f },
-    //     { 0.25f, 0.25f, 0.50f, 0.75f, 0.75f, 0.50f, 0.25f, 0.25f },
-    //     { 15.0f, 0.50f, 5.00f, 5.00f, 5.00f, 5.00f, 0.50f, 15.0f },
-    //     { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f, 0.75f, 15.0f },
-    //     { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f, 0.75f, 15.0f },
-    //     { 15.0f, 0.50f, 5.00f, 5.50f, 5.50f, 5.00f, 0.50f, 15.0f },
-    //     { 0.25f, 0.25f, 0.50f, 0.75f, 0.75f, 0.50f, 0.25f, 0.25f },
-    //     { 10000.0f, 0.25f, 15.0f, 15.0f, 15.0f, 15.0f, 0.25f, 10000.0f },
-    // };
     
     CpuPlayer(char p);
     ~CpuPlayer() override = default;
@@ -62,6 +54,23 @@ public:
 private:
     float Min(Game& game, Coord move, float alpha, float beta, int depth);
     float Max(Game& game, Coord move, float alpha, float beta, int depth);
+};
+
+struct Node; // defined in module
+struct Comp2; // defined in module
+class MctsCpuPLayer : public MinMaxCpuPlayer {
+public:
+    MctsCpuPLayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth);
+    ~MctsCpuPLayer() override = default;
+
+
+    Coord choseSquare(Game& game) override;
+private:
+    float rollout(Game& game);
+    void loadResponseChildren(
+            Game& game,
+            std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>,
+            Comp2>& pq, std::vector<Node>& parrent);
 };
 
 #endif

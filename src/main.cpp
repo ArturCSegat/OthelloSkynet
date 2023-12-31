@@ -78,8 +78,11 @@ float aval(const Game& game, const MinMaxCpuPlayer *const self) {
 }
 
 float aval2(const Game& game, const MinMaxCpuPlayer *const self) {
-    float p0_aval = 1;
-    float p1_aval = 1;
+    int this_idx = game.players[1]->piece == self->piece;
+    int op_idx = !(bool)this_idx;
+
+    float this_aval = 1;
+    float op_aval = 1;
     float aval;
     
     std::vector<float> modifiers;
@@ -126,34 +129,34 @@ float aval2(const Game& game, const MinMaxCpuPlayer *const self) {
                 continue;
             }
 
-            if (space == game.players[0]->piece) {
-                p0_aval += aval;
+            if (space == game.players[this_idx]->piece) {
+                this_aval += aval;
                 continue;
             }
-            p1_aval += aval;
+            op_aval += aval;
         }
     }
 
     int i = 0;
     for (auto &m: modifiers) {
-        if(list[i] == game.players[0]->piece) {
-            p0_aval *= m;
+        if(list[i] == game.players[this_idx]->piece) {
+            this_aval *= m;
             continue;
         }
-        p1_aval *= m;
+        op_aval *= m;
         i++;
     }
     
     // std::cout << p1_aval << " - " << p0_aval << "\n";
-    return p1_aval - p0_aval;
+    return this_aval - op_aval;
 }
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, 5));
-    auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('x', aval2, 5));
+    auto p1 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('o'));
+    auto p2 = std::make_unique<MctsCpuPLayer>(MctsCpuPLayer('x', aval, 50));
 
-    auto g = Game(std::move(p1), std::move(p2), ' ');
+    auto g = Game(std::move(p2), std::move(p1), ' ');
 
     while(g.running) {
         g.board.display();
@@ -180,7 +183,7 @@ int main() {
         }
 
         if (fliped == 0) {
-            std::cout << "Must playa valid square, must flip at least 1 piecez\n";
+            std::cout << "Bad move: " << move.toString() << " Must playa valid square, must flip at least 1 piecez\n";
             continue;
         }
 

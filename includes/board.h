@@ -6,7 +6,7 @@
 #include <array>
 #include <memory>
 #include <vector>
-#define GAME_N 10
+#define GAME_N 8
 
 class Board {
 public:
@@ -19,7 +19,7 @@ public:
 
     char& operator[] (Coord c);
     char const& operator[] (Coord c) const;
-    void display();
+    void display() const;
     
     void playDiegonalLR(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
     void playDiegonalRL(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;

@@ -6,7 +6,9 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <iomanip>
+#include <queue>
+#include <vector>
+#include <unistd.h>
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -42,24 +44,7 @@ Coord BadCpuPlayer::choseSquare(Game& game) {
 
 CpuPlayer::CpuPlayer(char p) : Player(p) {
     int bg_idx = GAME_N - 1;
-    // 8x8
-    // { 10000.0f, 0.25f, 15.0f, 3.75f, 3.75f, 2.50f, 0.25f, 10000.0f },
-    // { 0.25f, 0.25f, 0.50f, 0.75f, 0.75f, 0.50f, 0.25f, 0.25f },
-    // { 15.0f, 0.50f, 5.00f, 5.00f, 5.00f, 5.00f, 0.50f, 15.0f },
-    // { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f, 0.75f, 15.0f },
-    // { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f, 0.75f, 15.0f },
-    // { 15.0f, 0.50f, 5.00f, 5.50f, 5.50f, 5.00f, 0.50f, 15.0f },
-    // { 0.25f, 0.25f, 0.50f, 0.75f, 0.75f, 0.50f, 0.25f, 0.25f },
-    // { 10000.0f, 0.25f, 15.0f, 15.0f, 15.0f, 15.0f, 0.25f, 10000.0f },
-    
-    // 6x6
-    // { 10000.0f, 0.25f, 15.0f, 3.75f, 0.25f, 1000.0f},
-    // { 0.25f, 0.25f, 0.50f, 0.75f, 0.25f, 0.25f},
-    // { 15.0f, 0.50f, 5.00f, 5.00f, 5.00f, 5.00f},
-    // { 15.0f, 0.75f, 5.00f, 15.0f, 15.0f, 5.00f},
-    // { 0.25f, 0.25f, 5.00f, 15.0f, 0.25f, 0.25f},
-    // { 10000.0f, 0.25f, 15.0f, 3.75f, 0.25f, 1000.0f},
-    
+
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             aval_matrix[i][j] = 10;
@@ -136,6 +121,7 @@ CpuPlayer::CpuPlayer(char p) : Player(p) {
     aval_matrix[bg_idx - 1][bg_idx - 1] = 0.25;
     aval_matrix[bg_idx - 1][bg_idx] = 0.25;
 
+    // printing
     // for (int i = 0; i < GAME_N; i++) {
     //     for (int j = 0; j < GAME_N; j++) {
     //         // Add preceding zeros using setfill and setw
@@ -143,7 +129,7 @@ CpuPlayer::CpuPlayer(char p) : Player(p) {
     //     }
     //     std::cout << "\n";
     // }
-    // exit(2);
+    // exit(0);
 }
 
 Coord CpuPlayer::choseSquare(Game& game) {
@@ -183,7 +169,7 @@ Coord BetterCpuPlayer::choseSquare(Game& game) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
                 continue;
             }
             moves[avaliateMoveTillEnd(Coord{i, j}, std::move(game.clone()))] = Coord{i, j};
@@ -233,7 +219,7 @@ Coord MaybeEvenBetterCpuPlayer::choseSquare(Game& game) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
                 continue;
             }
             moves[avaliateShallowTreeTillEnd(Coord{i, j}, game.clone())] = Coord{i, j};
@@ -264,7 +250,7 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if(game->board[Coord{i, j}] != game->board.empty_square_marker
-                    || game->flipedFromMove(Coord{i, j}, game->curr_idx).size() == 0) {
+                    || game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()) {
                 continue;
             }
             int fit = avaliateMoveTillEnd(Coord{i, j}, game->clone());
@@ -289,7 +275,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
         for (int i = 0; i < GAME_N; i++) {
             for (int j = 0; j < GAME_N; j++) {
                 if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                        || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
+                        || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
                     continue;
                 }
 
@@ -327,7 +313,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
                 continue;
             }
 
@@ -375,7 +361,7 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
                 continue;
             }
             aval = Min(game, Coord{i, j}, alpha, beta, depth + 1);
@@ -409,7 +395,7 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).size() == 0){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
                 continue;
             }
             aval = Max(game, Coord{i, j}, alpha, beta, depth + 1);
@@ -425,4 +411,213 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
         }
     }
     return min_aval;
+}
+
+MctsCpuPLayer::MctsCpuPLayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth) : MinMaxCpuPlayer(p, aval, max_depth) {}
+
+struct Node {
+    Coord pos;
+    float val;
+    Coord og_parent;
+};
+
+struct Comp {
+public:
+    bool operator()(std::vector<Node> a, std::vector<Node> b) {
+        return a[a.size() - 1].val > b[b.size() - 1].val;
+    }
+};
+
+struct Comp2 {
+public:
+    bool operator()(std::vector<Node> a, std::vector<Node> b) {
+        return a[a.size() - 1].val < b[b.size() - 1].val;
+    }
+};
+
+void printPq(std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2> pq) {
+    while (!pq.empty()) {
+        std::cout << "{" << pq.top()[0].pos.toString() << "| " << pq.top().back().val << "| " << pq.top().size() << "}, ";
+        pq.pop();
+    }
+    std::cout << "\n";
+};
+
+void MctsCpuPLayer::loadResponseChildren(Game& game, std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2>& pq, std::vector<Node>& p) {
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                continue;
+            }
+
+            game.play(Coord{i, j});
+            
+            if (game.players[!game.curr_idx]->piece == this->piece) {
+                game.undo();
+                p.push_back(Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), p[0].pos});
+                pq.push(p);
+                p.pop_back();
+            } else {
+                p.push_back(Node{Coord{i, j}, MAXFLOAT * -1, p[0].pos});
+                loadResponseChildren(game, pq, p);
+                p.pop_back();
+                game.undo();
+            }
+        }
+    }
+}
+
+Coord MctsCpuPLayer::choseSquare(Game& game) {
+    std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2> pq;
+
+    auto p1 = game.players[0]->piece_count;
+    auto p2 = game.players[1]->piece_count;
+
+    int avaliable = 0;
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                continue;
+            }
+            avaliable ++;
+            // my move
+            game.play(Coord{i, j});
+
+            // their move
+            std::vector<Node> parrent_path = {{{i, j}, MAXFLOAT * -1, {i, j}}};
+            loadResponseChildren(game, pq, parrent_path);
+            game.undo();
+        }
+    }
+
+    if (pq.empty()) {
+        return Coord{-1, -1};
+    }
+
+    int iterations = 0;
+    std::vector<Node> best_path;
+    while (iterations < this->max_depth && !pq.empty()) {
+        // printPq(pq);
+        std::vector<Node> curr = pq.top();
+        pq.pop();
+
+        for (auto const& n: curr) {
+            game.play(n.pos);
+        }
+
+        for (int i = 0; i < GAME_N; i++) {
+            for (int j = 0; j < GAME_N; j++) {
+                if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                        || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                    continue;
+                }
+
+                // game.play(Coord{i, j});
+
+                std::vector<Node> copy(curr);
+                copy.push_back(Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), curr.back().og_parent});
+                pq.push(copy);
+
+                // game.undo();
+            }
+        }
+
+        for (int i = 0; i < curr.size(); i++) {
+            game.undo();
+        }
+
+        if (best_path.empty() || curr.back().val > best_path.back().val) {
+            best_path = curr;
+        }
+
+        iterations ++;
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        // printPq(pq);
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+    // exit(0);
+    
+    auto p12 = game.players[0]->piece_count;
+    auto p22 = game.players[1]->piece_count;
+
+    if (p1 != p12 || p2 != p22) {
+        std::cout << "\nmcts\n";
+        std::cout << "\nerror\n\n";
+        std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
+        std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
+        std::cout << "\nerror\n\n";
+        exit(1);
+    }
+
+    return best_path[0].pos;
+}
+
+float MctsCpuPLayer::rollout(Game& g) {
+    auto game = g.clone();
+    Coord sq;
+    Coord tmp;
+    // int play_count = game.play_count;
+    // auto p1 = game.players[0]->piece_count;
+    // auto p2 = game.players[1]->piece_count;
+    //
+    // std::cout << "before:\n";
+    // std::cout << "play_count: " << game.play_count << "\n";
+    // game.board.display();
+    do{
+        std::vector<Coord> valid_moves;
+        for (int i = 0; i < GAME_N; i++) {
+            for (int j = 0; j < GAME_N; j++) {
+                if (game->board[Coord{i, j}] != game->board.empty_square_marker) {continue;}
+                if (game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()) {continue;}
+                valid_moves.push_back(Coord{i, j});
+            }
+        }
+
+        if (valid_moves.empty()) {
+            tmp = Coord{-1, -1};
+        } else {
+            tmp = valid_moves[rand() % valid_moves.size()];
+        }
+
+        // not sure why but it eliminates bad sub-trees i guess;
+        if (tmp == sq) {
+            break;
+        }
+        sq = tmp;
+    }while(game->play(sq) != -2);
+    
+    // float val = this->aval(*game, this);
+    // std::cout << "after:\n";
+    // std::cout << "play_count: " << game.play_count << "\n";
+    // game.board.display();
+    //
+    // int c = 0;
+    // while (game.play_count > play_count) {
+    //     game.undo();
+    //     c++;
+    // }
+    //
+    // std::cout << "undone " << c << " times\n";
+    //
+    // std::cout << "after after:\n";
+    // std::cout << "play_count: " << game.play_count << "\n";
+    // game.board.display();
+    //
+    // auto p12 = game.players[0]->piece_count;
+    // auto p22 = game.players[1]->piece_count;
+    //
+    // if (p1 != p12 || p2 != p22) {
+    //     std::cout << "\nrollout\n";
+    //     std::cout << "\nerror\n\n";
+    //     std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
+    //     std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
+    //     std::cout << "\nerror\n\n";
+    //     exit(1);
+    // }
+    // int this_idx = game->players[1]->piece == this->piece;
+
+    // return game->players[this_idx]->piece_count - game->players[!this_idx]->piece_count;
+    return this->aval(*game, this);
 }

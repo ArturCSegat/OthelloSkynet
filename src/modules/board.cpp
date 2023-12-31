@@ -38,7 +38,7 @@ char const& Board::operator[] (Coord c) const {
     return board[c.row][c.col];
 }
 
-void Board::display() {
+void Board::display() const {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (!j) {
