@@ -13,8 +13,11 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
     board[Coord{bg_idx, bg_idx}] = player1->piece;
     board[Coord{sm_idx, bg_idx}] = player2->piece;
     board[Coord{bg_idx, sm_idx}] = player2->piece;
-    player1->piece_count += 2;
-    player2->piece_count += 2;
+
+    if (player1->piece_count == 0 || player2->piece_count == 0) {
+        player1->piece_count += 2;
+        player2->piece_count += 2;
+    }
 
     players[0] = std::move(player1);
     players[1] = std::move(player2);
@@ -117,6 +120,7 @@ void Game::undo() {
 std::unique_ptr<Game> Game::clone() const{
     auto p1 = std::make_unique<Player>(Player(players[0]->piece));
     p1->piece_count = players[0]->piece_count;
+
     auto p2 =  std::make_unique<Player>(Player(players[1]->piece));
     p2->piece_count = players[1]->piece_count;
     char df = board.empty_square_marker;
@@ -126,10 +130,14 @@ std::unique_ptr<Game> Game::clone() const{
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             g->board[Coord{i, j}] = board[Coord{i, j}];
+            g->age_matrix[i][j] = age_matrix[i][j];
         }
     }
 
     g->curr_idx = curr_idx;
+    // g->flips = flips;
+    g->play_count = play_count;
+    g->running = running;
 
     return g;
 }
@@ -150,8 +158,16 @@ void Game::endGame() {
     running = false;
 }
 
-void Game::printPlayerInfo(){
+void Game::printPlayerInfo() const {
     std::cout << "turn: " << players[curr_idx]->piece << "\n";
     std::cout << "player " << players[0]->piece << ": " << players[0]->piece_count << "\n";
     std::cout << "player " << players[1]->piece << ": " << players[1]->piece_count << "\n";
+}
+
+bool Game::isOver() const {
+    if (players[0]->piece_count + players[1]->piece_count == (GAME_N * GAME_N) || players[0]->piece_count == 0 || players[1]->piece_count == 0) {
+        return true;
+    }
+    return false;
+
 }

@@ -8,7 +8,6 @@
 #include <chrono>
 #include <queue>
 #include <vector>
-#include <unistd.h>
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
 
@@ -413,25 +412,40 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     return min_aval;
 }
 
-MctsCpuPLayer::MctsCpuPLayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth) : MinMaxCpuPlayer(p, aval, max_depth) {}
+MctsCpuPlayer::MctsCpuPlayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth) : MinMaxCpuPlayer(p, aval, max_depth) {}
 
 struct Node {
     Coord pos;
     float val;
+    int player_idx;
     Coord og_parent;
 };
 
 struct Comp {
 public:
     bool operator()(std::vector<Node> a, std::vector<Node> b) {
-        return a[a.size() - 1].val > b[b.size() - 1].val;
+        return a[a.size() - 1].val < b[b.size() - 1].val;
     }
 };
 
 struct Comp2 {
 public:
     bool operator()(std::vector<Node> a, std::vector<Node> b) {
-        return a[a.size() - 1].val < b[b.size() - 1].val;
+        // float a_val = 0;
+        // float b_val = 0;
+        // 
+        // int a_idx = a.size() - 1;
+        // while (a[a_idx].player_idx == 0 and a_idx > 0) {
+        //     a_idx --;
+        // } 
+        //
+        // int b_idx = b.size() - 1;
+        // while (b[b_idx].player_idx == 0 and b_idx > 0) {
+        //     b_idx --;
+        // } 
+        // 
+        // return a[a_idx].val < b[b_idx].val;
+        return a.back().val < b.back().val;
     }
 };
 
@@ -443,32 +457,26 @@ void printPq(std::priority_queue<std::vector<Node>, std::vector<std::vector<Node
     std::cout << "\n";
 };
 
-void MctsCpuPLayer::loadResponseChildren(Game& game, std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2>& pq, std::vector<Node>& p) {
-    for (int i = 0; i < GAME_N; i++) {
-        for (int j = 0; j < GAME_N; j++) {
-            if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
-                continue;
-            }
+// set the queue to the appripriate position and return changes
+std::vector<std::vector<Node>> set_to_next(std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2>& pq, int last_avaliated) {
+    std::vector<std::vector<Node>> helper_stack;
+    auto curr = pq.top();
+    while(curr.back().player_idx == last_avaliated && !pq.empty()) {
+        curr = pq.top();
+        helper_stack.push_back(curr);
+        pq.pop();
+    }
+    return helper_stack;
+}
 
-            game.play(Coord{i, j});
-            
-            if (game.players[!game.curr_idx]->piece == this->piece) {
-                game.undo();
-                p.push_back(Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), p[0].pos});
-                pq.push(p);
-                p.pop_back();
-            } else {
-                p.push_back(Node{Coord{i, j}, MAXFLOAT * -1, p[0].pos});
-                loadResponseChildren(game, pq, p);
-                p.pop_back();
-                game.undo();
-            }
-        }
+void set_back (std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2>& pq, std::vector<std::vector<Node>> changes) {
+    for (auto const& item: changes) {
+        pq.push(item);
     }
 }
 
-Coord MctsCpuPLayer::choseSquare(Game& game) {
+Coord MctsCpuPlayer::choseSquare(Game& game) {
+    int last_avaliated;
     std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2> pq;
 
     auto p1 = game.players[0]->piece_count;
@@ -482,15 +490,18 @@ Coord MctsCpuPLayer::choseSquare(Game& game) {
                 continue;
             }
             avaliable ++;
-            // my move
+
             game.play(Coord{i, j});
 
-            // their move
-            std::vector<Node> parrent_path = {{{i, j}, MAXFLOAT * -1, {i, j}}};
-            loadResponseChildren(game, pq, parrent_path);
+            // pq.push({Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), game.curr_idx, Coord{i, j}}});
+
+            pq.push({Node{Coord{i, j}, this->aval(game, this), !game.curr_idx, Coord{i, j}}});
+
             game.undo();
         }
     }
+
+    last_avaliated = !game.curr_idx;
 
     if (pq.empty()) {
         return Coord{-1, -1};
@@ -499,9 +510,20 @@ Coord MctsCpuPLayer::choseSquare(Game& game) {
     int iterations = 0;
     std::vector<Node> best_path;
     while (iterations < this->max_depth && !pq.empty()) {
-        // printPq(pq);
-        std::vector<Node> curr = pq.top();
-        pq.pop();
+        auto changes = set_to_next(pq, last_avaliated);
+
+        std::vector<Node> curr;
+        if (pq.empty()) {
+            set_back(pq, changes);
+            curr = pq.top();
+            pq.pop();
+        } else {
+            curr = pq.top();
+            pq.pop();
+            set_back(pq, changes);
+        }
+
+        last_avaliated =! last_avaliated;
 
         for (auto const& n: curr) {
             game.play(n.pos);
@@ -514,22 +536,26 @@ Coord MctsCpuPLayer::choseSquare(Game& game) {
                     continue;
                 }
 
-                // game.play(Coord{i, j});
+                game.play(Coord{i, j});
 
                 std::vector<Node> copy(curr);
-                copy.push_back(Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), curr.back().og_parent});
+                // copy.push_back(Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), game.curr_idx, curr.back().og_parent});
+                copy.push_back(Node{Coord{i, j}, this->aval(game, this), !game.curr_idx, curr.back().og_parent});
+                
                 pq.push(copy);
 
-                // game.undo();
+                game.undo();
             }
         }
 
-        for (int i = 0; i < curr.size(); i++) {
+        for (auto const& n: curr) {
             game.undo();
         }
 
-        if (best_path.empty() || curr.back().val > best_path.back().val) {
-            best_path = curr;
+        int this_idx = game.players[1]->piece == this->piece;
+        // if (best_path.empty() || (best_path.back().player_idx == this_idx && curr.back().val > best_path.back().val)) {
+        if ((best_path.empty() || curr.back().val > best_path.back().val) && curr.back().player_idx == this_idx) {
+                best_path = curr;
         }
 
         iterations ++;
@@ -554,70 +580,3 @@ Coord MctsCpuPLayer::choseSquare(Game& game) {
     return best_path[0].pos;
 }
 
-float MctsCpuPLayer::rollout(Game& g) {
-    auto game = g.clone();
-    Coord sq;
-    Coord tmp;
-    // int play_count = game.play_count;
-    // auto p1 = game.players[0]->piece_count;
-    // auto p2 = game.players[1]->piece_count;
-    //
-    // std::cout << "before:\n";
-    // std::cout << "play_count: " << game.play_count << "\n";
-    // game.board.display();
-    do{
-        std::vector<Coord> valid_moves;
-        for (int i = 0; i < GAME_N; i++) {
-            for (int j = 0; j < GAME_N; j++) {
-                if (game->board[Coord{i, j}] != game->board.empty_square_marker) {continue;}
-                if (game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()) {continue;}
-                valid_moves.push_back(Coord{i, j});
-            }
-        }
-
-        if (valid_moves.empty()) {
-            tmp = Coord{-1, -1};
-        } else {
-            tmp = valid_moves[rand() % valid_moves.size()];
-        }
-
-        // not sure why but it eliminates bad sub-trees i guess;
-        if (tmp == sq) {
-            break;
-        }
-        sq = tmp;
-    }while(game->play(sq) != -2);
-    
-    // float val = this->aval(*game, this);
-    // std::cout << "after:\n";
-    // std::cout << "play_count: " << game.play_count << "\n";
-    // game.board.display();
-    //
-    // int c = 0;
-    // while (game.play_count > play_count) {
-    //     game.undo();
-    //     c++;
-    // }
-    //
-    // std::cout << "undone " << c << " times\n";
-    //
-    // std::cout << "after after:\n";
-    // std::cout << "play_count: " << game.play_count << "\n";
-    // game.board.display();
-    //
-    // auto p12 = game.players[0]->piece_count;
-    // auto p22 = game.players[1]->piece_count;
-    //
-    // if (p1 != p12 || p2 != p22) {
-    //     std::cout << "\nrollout\n";
-    //     std::cout << "\nerror\n\n";
-    //     std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
-    //     std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
-    //     std::cout << "\nerror\n\n";
-    //     exit(1);
-    // }
-    // int this_idx = game->players[1]->piece == this->piece;
-
-    // return game->players[this_idx]->piece_count - game->players[!this_idx]->piece_count;
-    return this->aval(*game, this);
-}

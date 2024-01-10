@@ -29,7 +29,8 @@ public:
 
     void endGame();
 
-    void printPlayerInfo();
+    void printPlayerInfo() const;
+    bool isOver() const;
 };
 
 #endif

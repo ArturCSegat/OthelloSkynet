@@ -56,21 +56,15 @@ private:
     float Max(Game& game, Coord move, float alpha, float beta, int depth);
 };
 
-struct Node; // defined in module
-struct Comp2; // defined in module
-class MctsCpuPLayer : public MinMaxCpuPlayer {
+class MctsCpuPlayer : public MinMaxCpuPlayer {
 public:
-    MctsCpuPLayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth);
-    ~MctsCpuPLayer() override = default;
+    MctsCpuPlayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth);
+    ~MctsCpuPlayer() override = default;
 
 
     Coord choseSquare(Game& game) override;
-private:
-    float rollout(Game& game);
-    void loadResponseChildren(
-            Game& game,
-            std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>,
-            Comp2>& pq, std::vector<Node>& parrent);
+// private:
+//     float rollout(Game& game);
 };
 
 #endif
