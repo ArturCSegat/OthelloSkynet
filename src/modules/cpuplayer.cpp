@@ -1,6 +1,8 @@
+#include "../../includes/treenode.h"
 #include "../../includes/cpuplayer.h"
 #include "../../includes/game.h"
-#include <cmath>
+
+#include <math.h>
 #include <map>
 #include <memory>
 #include <iostream>
@@ -284,7 +286,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
                 float fit = Min(game, Coord{i, j}, MAXFLOAT * -1, MAXFLOAT, 0);
                 game.undo();
 
-                std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
+                // std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
 
                 auto p12 = game.players[0]->piece_count;
                 auto p22 = game.players[1]->piece_count;
@@ -322,7 +324,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
             float fit = Max(game, Coord{i, j}, MAXFLOAT * -1, MAXFLOAT, 0);
             game.undo();
 
-            std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
+            // std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
 
             auto p12 = game.players[0]->piece_count;
             auto p22 = game.players[1]->piece_count;
@@ -412,171 +414,54 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     return min_aval;
 }
 
-MctsCpuPlayer::MctsCpuPlayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth) : MinMaxCpuPlayer(p, aval, max_depth) {}
-
-struct Node {
-    Coord pos;
-    float val;
-    int player_idx;
-    Coord og_parent;
-};
-
-struct Comp {
-public:
-    bool operator()(std::vector<Node> a, std::vector<Node> b) {
-        return a[a.size() - 1].val < b[b.size() - 1].val;
+MctsCpuPlayer::MctsCpuPlayer(
+        char p,
+        float(*rollout)(const Game& game, const MinMaxCpuPlayer *const self),
+        float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
+        int max_depth
+        )
+    : MinMaxCpuPlayer(p, aval, max_depth) {
+        this->rollout = rollout;
     }
-};
-
-struct Comp2 {
-public:
-    bool operator()(std::vector<Node> a, std::vector<Node> b) {
-        // float a_val = 0;
-        // float b_val = 0;
-        // 
-        // int a_idx = a.size() - 1;
-        // while (a[a_idx].player_idx == 0 and a_idx > 0) {
-        //     a_idx --;
-        // } 
-        //
-        // int b_idx = b.size() - 1;
-        // while (b[b_idx].player_idx == 0 and b_idx > 0) {
-        //     b_idx --;
-        // } 
-        // 
-        // return a[a_idx].val < b[b_idx].val;
-        return a.back().val < b.back().val;
-    }
-};
-
-void printPq(std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2> pq) {
-    while (!pq.empty()) {
-        std::cout << "{" << pq.top()[0].pos.toString() << "| " << pq.top().back().val << "| " << pq.top().size() << "}, ";
-        pq.pop();
-    }
-    std::cout << "\n";
-};
-
-// set the queue to the appripriate position and return changes
-std::vector<std::vector<Node>> set_to_next(std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2>& pq, int last_avaliated) {
-    std::vector<std::vector<Node>> helper_stack;
-    auto curr = pq.top();
-    while(curr.back().player_idx == last_avaliated && !pq.empty()) {
-        curr = pq.top();
-        helper_stack.push_back(curr);
-        pq.pop();
-    }
-    return helper_stack;
-}
-
-void set_back (std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2>& pq, std::vector<std::vector<Node>> changes) {
-    for (auto const& item: changes) {
-        pq.push(item);
-    }
-}
 
 Coord MctsCpuPlayer::choseSquare(Game& game) {
-    int last_avaliated;
-    std::priority_queue<std::vector<Node>, std::vector<std::vector<Node>>, Comp2> pq;
+    auto root = MctsNode({-10, -10}, game.curr_idx, MAXFLOAT * -1); // bad move so it errors and keeps the turn on the same player
+    std::vector<MctsNode*> curr;
 
-    auto p1 = game.players[0]->piece_count;
-    auto p2 = game.players[1]->piece_count;
+    int iter_count = 0;
 
-    int avaliable = 0;
-    for (int i = 0; i < GAME_N; i++) {
-        for (int j = 0; j < GAME_N; j++) {
-            if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
-                continue;
-            }
-            avaliable ++;
+    while(iter_count < this->max_depth) {
+        root.select(curr);
 
-            game.play(Coord{i, j});
-
-            // pq.push({Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), game.curr_idx, Coord{i, j}}});
-
-            pq.push({Node{Coord{i, j}, this->aval(game, this), !game.curr_idx, Coord{i, j}}});
-
-            game.undo();
-        }
-    }
-
-    last_avaliated = !game.curr_idx;
-
-    if (pq.empty()) {
-        return Coord{-1, -1};
-    }
-
-    int iterations = 0;
-    std::vector<Node> best_path;
-    while (iterations < this->max_depth && !pq.empty()) {
-        auto changes = set_to_next(pq, last_avaliated);
-
-        std::vector<Node> curr;
-        if (pq.empty()) {
-            set_back(pq, changes);
-            curr = pq.top();
-            pq.pop();
-        } else {
-            curr = pq.top();
-            pq.pop();
-            set_back(pq, changes);
+        for (auto& n: curr) {
+            game.play(n->move);
         }
 
-        last_avaliated =! last_avaliated;
+        curr.back()->expand_simulate(game, this);
+        curr.back()->backpropagate();
 
-        for (auto const& n: curr) {
-            game.play(n.pos);
-        }
-
-        for (int i = 0; i < GAME_N; i++) {
-            for (int j = 0; j < GAME_N; j++) {
-                if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                        || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
-                    continue;
-                }
-
-                game.play(Coord{i, j});
-
-                std::vector<Node> copy(curr);
-                // copy.push_back(Node{Coord{i, j}, (float)avaliateMoveTillEnd(Coord{i, j}, game.clone()), game.curr_idx, curr.back().og_parent});
-                copy.push_back(Node{Coord{i, j}, this->aval(game, this), !game.curr_idx, curr.back().og_parent});
-                
-                pq.push(copy);
-
-                game.undo();
-            }
-        }
-
-        for (auto const& n: curr) {
+        // start at first index to skip undoing root
+        for (int i = 1; i < curr.size(); i++) {
             game.undo();
         }
 
-        int this_idx = game.players[1]->piece == this->piece;
-        // if (best_path.empty() || (best_path.back().player_idx == this_idx && curr.back().val > best_path.back().val)) {
-        if ((best_path.empty() || curr.back().val > best_path.back().val) && curr.back().player_idx == this_idx) {
-                best_path = curr;
+        curr.clear();
+        iter_count ++;
+    }
+
+    if (root.children.empty()) {
+        return {-1, -1};
+    }
+
+    int big_idx = 0;
+    int big_val = root.children[0]->value;
+    for (int i = 0; i < root.children.size(); i++) {
+        if (root.children[i]->value > big_val) {
+            big_idx = i;
+            big_val = root.children[i]->value;
         }
-
-        iterations ++;
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        // printPq(pq);
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-    // exit(0);
-    
-    auto p12 = game.players[0]->piece_count;
-    auto p22 = game.players[1]->piece_count;
-
-    if (p1 != p12 || p2 != p22) {
-        std::cout << "\nmcts\n";
-        std::cout << "\nerror\n\n";
-        std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
-        std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
-        std::cout << "\nerror\n\n";
-        exit(1);
     }
 
-    return best_path[0].pos;
+    return root.children[big_idx]->move;
 }
 

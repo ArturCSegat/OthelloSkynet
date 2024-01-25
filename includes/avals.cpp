@@ -153,7 +153,7 @@ float aval2(const Game& game, const MinMaxCpuPlayer *const self) {
 
 float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
     auto game = g.clone();
-    
+
     int turn = !(g.curr_idx);
     Coord sq = {-1, -1};
     int last_played = !turn;
@@ -168,25 +168,27 @@ float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
         std::array<float, 3> top_weights;
         int w_idx = 0;
 
-    for (int i = 0; i < GAME_N; i++) {
-        for (int j = 0; j < GAME_N; j++) {
-            if (game->board[Coord{i, j}] != game->board.empty_square_marker
-                    || game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()){
-                continue;
-            }
+        for (int i = 0; i < GAME_N; i++) {
+            for (int j = 0; j < GAME_N; j++) {
+                if (game->board[Coord{i, j}] != game->board.empty_square_marker
+                        || game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()){
+                    continue;
+                }
 
-                auto fit = self->aval_matrix[i][j];
-                
+                auto fit = self->aval_matrix[i][j] * self->aval_matrix[i][j];
+
                 if (m_idx < 3) {
                     top_moves[m_idx] = {i, j}; m_idx++;
                     top_weights[w_idx] = fit; w_idx++;
-                } 
-
-                int idx = 0;
-                for (auto &val : top_weights) {
-                    if (val < fit) {
-                        top_weights[idx] = fit;
-                        top_moves[idx] = {i, j};
+                } else {
+                    int idx = 0;
+                    for (auto &val : top_weights) {
+                        if (val < fit) {
+                            top_weights[idx] = fit;
+                            top_moves[idx] = {i, j};
+                            break;
+                        }
+                        idx++;
                     }
                 }
             }
@@ -197,7 +199,7 @@ float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
         }
 
         // not sure why but it eliminates bad sub-trees i guess;
-        if (tmp == sq && game->curr_idx != last_played) {
+        if (tmp == sq && game->curr_idx != last_played && tmp == Coord{-1, -1}) {
             // error cases
             // if (game->players[0]->piece_count + game->players[1]->piece_count  < 20 && game->players[1]->piece_count != 0 && game->players[0]->piece_count != 0) {
             //     std::cout << "ended with " << game->players[0]->piece_count + game->players[1]->piece_count << " pieces\n";
@@ -230,6 +232,14 @@ float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
         last_played = game->curr_idx;
         p = game->play(sq);
     }
-    
-    return game->players[turn]->piece_count - game->players[!turn]->piece_count;
+
+    float dif = game->players[turn]->piece_count > game->players[!turn]->piece_count;
+    if (dif > 0) {
+        return 1;
+    }
+    if (dif == 0) {
+        return 0;
+    }
+    return -1;
 }
+

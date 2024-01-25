@@ -58,7 +58,13 @@ private:
 
 class MctsCpuPlayer : public MinMaxCpuPlayer {
 public:
-    MctsCpuPlayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth);
+    MctsCpuPlayer(
+            char p,
+            float(*rollout)(const Game& game, const MinMaxCpuPlayer *const self),
+            float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
+            int max_depth
+            );
+     float(*rollout)(const Game& game, const MinMaxCpuPlayer * const self);
     ~MctsCpuPlayer() override = default;
 
 
