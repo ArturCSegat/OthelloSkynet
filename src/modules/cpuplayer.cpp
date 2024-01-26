@@ -2,6 +2,7 @@
 #include "../../includes/cpuplayer.h"
 #include "../../includes/game.h"
 
+#include <array>
 #include <math.h>
 #include <map>
 #include <memory>
@@ -465,3 +466,25 @@ Coord MctsCpuPlayer::choseSquare(Game& game) {
     return root.children[big_idx]->move;
 }
 
+MctsCpuPlayer2::MctsCpuPlayer2(
+        char p,
+        float(*aval)(const Game& game, const MinMaxCpuPlayer * const self),
+        int max_depth)
+        : MinMaxCpuPlayer(p, aval, max_depth)
+{}
+
+Coord MctsCpuPlayer2::choseSquare(Game& game) {
+    std::vector<Coord> children;
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
+            if (game.board[Coord{i, j}] != game.board.empty_square_marker
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                continue;
+            }
+            children.push_back({i, j});
+        }
+    }
+    std::vector<int> wins;
+    std::vector<int> visits;
+    std::vector<float> ucts;
+}

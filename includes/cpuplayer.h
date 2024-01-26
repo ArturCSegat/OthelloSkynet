@@ -67,10 +67,18 @@ public:
      float(*rollout)(const Game& game, const MinMaxCpuPlayer * const self);
     ~MctsCpuPlayer() override = default;
 
-
     Coord choseSquare(Game& game) override;
-// private:
-//     float rollout(Game& game);
+};
+
+class MctsCpuPlayer2 : public MinMaxCpuPlayer {
+public:
+    MctsCpuPlayer2(
+            char p,
+            float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
+            int max_depth
+    );
+    ~MctsCpuPlayer2() override = default;
+    Coord choseSquare(Game& game) override;
 };
 
 #endif

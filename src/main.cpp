@@ -9,8 +9,8 @@
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval2, 5));
-    auto p2 = std::make_unique<MctsCpuPlayer>(MctsCpuPlayer('x', rollout2, rollout2, 5000));
+    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval2, 4));
+    auto p2 = std::make_unique<MctsCpuPlayer>(MctsCpuPlayer('x', rollout2, rollout2, 2500));
 
     auto g = Game(std::move(p2), std::move(p1), ' ');
 
