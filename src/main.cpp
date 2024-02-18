@@ -1,23 +1,29 @@
 #include "../includes/game.h"
 #include "../includes/cpuplayer.h"
+#include "../includes/treenode.h"
 #include "../includes/avals.cpp"
+#include <ctime>
 #include <math.h>
 #include <iostream>
 #include <memory>
-#include <chrono>
-#include <thread>
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval2, 4));
-    auto p2 = std::make_unique<MctsCpuPlayer>(MctsCpuPlayer('x', rollout2, rollout2, 2500));
+    auto p1 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('o'));
+    auto p2 = std::make_unique<MctsCpuPlayer3>(MctsCpuPlayer3('x', rollout, 1500, 0));
 
     auto g = Game(std::move(p2), std::move(p1), ' ');
+
+    auto p1_time = 0;
+    auto p2_time = 0;
+    auto p1_count = 0;
+    auto p2_count = 0;
 
     while(g.running) {
         g.board.display();
         g.printPlayerInfo();
 
+        auto start = clock();
         Coord move = g.players[g.curr_idx]->choseSquare(g);
 
         if (move == Coord{-1, -1}) {
@@ -31,9 +37,15 @@ int main() {
         int fliped;
 
         fliped = g.play(move);
+        auto time = (clock() - start) / CLOCKS_PER_SEC;
+        std::cout << "took " << time << " seconds to play " << move.toString() << "\n";
+        p1_time += time;
+        p1_count ++;
 
         if (fliped == -2) {
             g.board.display();
+            std::cout << "avg p1_time: " << p1_time / p1_count << "\n";
+            std::cout << "avg p2_time: " << p2_time / p2_count << "\n";
             g.endGame();
             break;
         }
@@ -46,6 +58,7 @@ int main() {
         g.board.display();
         g.printPlayerInfo();
 
+        start = clock();
         Coord cpu_move = g.players[g.curr_idx]->choseSquare(g);
 
         if (cpu_move == Coord{-3, -3}) {
@@ -63,9 +76,15 @@ int main() {
         }
 
         int over = g.play(cpu_move);
+        time = (clock() - start) / CLOCKS_PER_SEC; 
+        std::cout << "took " <<  time << " seconds to play " << cpu_move.toString() << "\n";
+        p2_time += time;
+        p2_count ++;
 
         if (over == -2 ) {
             g.board.display();
+            std::cout << "avg p1_time: " << p1_time / p1_count << "\n";
+            std::cout << "avg p2_time: " << p2_time / p2_count << "\n";
             g.endGame();
             break;
         }

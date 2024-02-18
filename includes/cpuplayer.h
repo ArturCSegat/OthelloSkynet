@@ -6,6 +6,7 @@
 #include <queue>
 #include <vector>
 
+
 class BadCpuPlayer: public Player {
 public:
     BadCpuPlayer(char p);
@@ -54,31 +55,6 @@ public:
 private:
     float Min(Game& game, Coord move, float alpha, float beta, int depth);
     float Max(Game& game, Coord move, float alpha, float beta, int depth);
-};
-
-class MctsCpuPlayer : public MinMaxCpuPlayer {
-public:
-    MctsCpuPlayer(
-            char p,
-            float(*rollout)(const Game& game, const MinMaxCpuPlayer *const self),
-            float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
-            int max_depth
-            );
-     float(*rollout)(const Game& game, const MinMaxCpuPlayer * const self);
-    ~MctsCpuPlayer() override = default;
-
-    Coord choseSquare(Game& game) override;
-};
-
-class MctsCpuPlayer2 : public MinMaxCpuPlayer {
-public:
-    MctsCpuPlayer2(
-            char p,
-            float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
-            int max_depth
-    );
-    ~MctsCpuPlayer2() override = default;
-    Coord choseSquare(Game& game) override;
 };
 
 #endif

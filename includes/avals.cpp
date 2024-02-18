@@ -175,7 +175,10 @@ float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
                     continue;
                 }
 
-                auto fit = self->aval_matrix[i][j] * self->aval_matrix[i][j];
+                auto fit = 0;
+                for (auto move: game->flipedFromMove({i, j}, game->curr_idx)) {
+                    fit += self->aval_matrix[move.row][move.col];
+                }
 
                 if (m_idx < 3) {
                     top_moves[m_idx] = {i, j}; m_idx++;
@@ -243,3 +246,83 @@ float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
     return -1;
 }
 
+float rollout(const Game& g, const MinMaxCpuPlayer *const self) {
+    auto game = g.clone();
+
+    int turn = !(g.curr_idx);
+    Coord sq = {-1, -1};
+    int last_played = !turn;
+
+    int p = 0;
+    while(true){
+        if (p == -2) break;
+
+        Coord tmp = {-1, -1};
+        std::vector<Coord> moves;
+        // std::vector<int> weights;
+
+        for (int i = 0; i < GAME_N; i++) {
+            for (int j = 0; j < GAME_N; j++) {
+                if (game->board[Coord{i, j}] != game->board.empty_square_marker
+                        || game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()){
+                    continue;
+                }
+
+                moves.push_back({i, j});
+                // int m = i * 10 + j;
+                // switch (m) {
+                //    case 11:
+                //    case 16:
+                //    case 61:
+                //    case 66:
+                //        weights.push_back(1);
+                //        break;
+                //     default:
+                //        weights.push_back(10);
+                //        break;
+                // }
+                
+                
+            }
+        }
+
+        if (!moves.empty()) {
+            // Calculate total weight
+            // int totalWeight = 0;
+            // for (auto w: weights) {
+            //     totalWeight += w;
+            // }
+            //
+            // // Generate a random number in the range [0, totalWeight)
+            // int randNum = rand() % totalWeight;
+            //
+            // // Choose move based on weighted random selection
+            // int cumulativeWeight = 0;
+            // for (size_t i = 0; i < moves.size(); ++i) {
+            //     cumulativeWeight += weights[i];
+            //     if (randNum < cumulativeWeight) {
+            //         tmp = moves[i];
+            //         break;
+            //     }
+            // }        
+            tmp = moves[rand() % moves.size()];
+        }
+
+        // not sure why but it eliminates bad sub-trees i guess;
+        if (tmp == sq && game->curr_idx != last_played && tmp == Coord{-1, -1}) {
+            break;
+        }
+        sq = tmp;
+        last_played = game->curr_idx;
+        p = game->play(sq);
+    }
+
+    int dif = game->players[turn]->piece_count - game->players[!turn]->piece_count;
+    if (dif > 0) {
+        return 1;
+    }
+    if (dif == 0) {
+        return 0;
+    }
+    return -1;
+}
