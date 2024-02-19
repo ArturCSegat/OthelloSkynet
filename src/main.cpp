@@ -36,7 +36,7 @@ int main() {
 
         int fliped;
 
-        fliped = g.play(move);
+        fliped = g.play(move, true);
         auto time = (clock() - start) / CLOCKS_PER_SEC;
         std::cout << "took " << time << " seconds to play " << move.toString() << "\n";
         p1_time += time;
@@ -75,7 +75,7 @@ int main() {
             break;
         }
 
-        int over = g.play(cpu_move);
+        int over = g.play(cpu_move, true);
         time = (clock() - start) / CLOCKS_PER_SEC; 
         std::cout << "took " <<  time << " seconds to play " << cpu_move.toString() << "\n";
         p2_time += time;

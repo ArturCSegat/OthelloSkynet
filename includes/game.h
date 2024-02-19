@@ -17,12 +17,15 @@ public:
     int curr_idx;
     int play_count;
     bool running;
+    std::vector<Coord> to_flip;
 
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
 
-    std::vector<Coord> flipedFromMove(Coord move, int player_idx) const;
+    // returns how many needs to be fliped and sets this->to_flip to the respective coords
+    int flipedFromMove(Coord move, int player_idx);
 
-    int play(Coord c);
+    // plays the given Coord, if calc is true, will calculate this->to_flip, if you've just ran flipeFromMove for Coord c, set it to false
+    int play(Coord c, bool calc);
     void undo();
 
     std::unique_ptr<Game> clone() const;

@@ -88,13 +88,13 @@ void MctsNode::expand_simulate_backpropagte(Game& game, MctsCpuPlayer * self) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0
                     || has_child_move(this, {i, j})
                 ){
                 continue;
             }
             int played_by = game.curr_idx;
-            int p = game.play({i, j});
+            int p = game.play({i, j}, false);
             int playout_wins = 0;
 
             for (int count = 0; count < SIM_COUNT; count++) {

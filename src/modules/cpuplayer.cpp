@@ -22,7 +22,7 @@ Coord BadCpuPlayer::choseSquare(Game& game) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker) {
                 continue;
             }
-            int flipped = game.flipedFromMove(Coord{i, j}, game.curr_idx).size(); 
+            int flipped = game.flipedFromMove(Coord{i, j}, game.curr_idx); 
             if (flipped == 0) {
                 continue;
             }
@@ -142,7 +142,7 @@ Coord CpuPlayer::choseSquare(Game& game) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker){
                 continue;
             }
-            int flipped = game.flipedFromMove(Coord{i, j}, game.curr_idx).size(); 
+            int flipped = game.flipedFromMove(Coord{i, j}, game.curr_idx); 
             if (flipped == 0) {
                 continue;
             }
@@ -172,7 +172,7 @@ Coord BetterCpuPlayer::choseSquare(Game& game) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0){
                 continue;
             }
             moves[avaliateMoveTillEnd(Coord{i, j}, std::move(game.clone()))] = Coord{i, j};
@@ -197,7 +197,7 @@ Coord BetterCpuPlayer::choseSquare(Game& game) {
 
 int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game) {
     // std::cout << "move: " << move.toString() << " avaliateMoveTillEnd\n";
-    game->play(move);
+    game->play(move, true);
     Coord sq;
     do{
         Coord tmp = CpuPlayer::choseSquare(*game);
@@ -206,7 +206,7 @@ int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game)
             break;
         }
         sq = tmp;
-    }while(game->play(sq) != -2);
+    }while(game->play(sq, true) != -2);
 
     int this_idx = game->players[1]->piece == this->piece;
 
@@ -222,7 +222,7 @@ Coord MaybeEvenBetterCpuPlayer::choseSquare(Game& game) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0){
                 continue;
             }
             moves[avaliateShallowTreeTillEnd(Coord{i, j}, game.clone())] = Coord{i, j};
@@ -246,14 +246,14 @@ Coord MaybeEvenBetterCpuPlayer::choseSquare(Game& game) {
 }
 
 int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique_ptr<Game> game) {
-    game->play(move);
+    game->play(move, true);
     
     int aval_sum;
     
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if(game->board[Coord{i, j}] != game->board.empty_square_marker
-                    || game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()) {
+                    || game->flipedFromMove(Coord{i, j}, game->curr_idx) == 0) {
                 continue;
             }
             int fit = avaliateMoveTillEnd(Coord{i, j}, game->clone());
@@ -278,7 +278,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
         for (int i = 0; i < GAME_N; i++) {
             for (int j = 0; j < GAME_N; j++) {
                 if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                        || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                        || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0){
                     continue;
                 }
 
@@ -316,7 +316,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0){
                 continue;
             }
 
@@ -355,7 +355,7 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     // std::cout << "MAx turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
     float max_aval = MAXFLOAT * -1;
     float aval;
-    int r = game.play(move);
+    int r = game.play(move, true);
 
     if (r == -2 || depth == this->max_depth) {
         return this->aval(game, this);
@@ -364,7 +364,7 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0){
                 continue;
             }
             aval = Min(game, Coord{i, j}, alpha, beta, depth + 1);
@@ -389,7 +389,7 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     // std::cout << "Min turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
     float min_aval = MAXFLOAT;
     float aval;
-    int r = game.play(move);
+    int r = game.play(move, true);
 
     if (r == -2 || depth == this->max_depth) {
         return this->aval(game, this);
@@ -398,7 +398,7 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx).empty()){
+                    || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0){
                 continue;
             }
             aval = Max(game, Coord{i, j}, alpha, beta, depth + 1);
@@ -439,7 +439,7 @@ Coord MctsCpuPlayer::choseSquare(Game& game) {
             // }
             root.select(curr);
             for (auto& n: curr) {
-                game.play(n->move);
+                game.play(n->move, true);
             }
 
             curr.back()->expand_simulate_backpropagte(game, this);
@@ -483,22 +483,23 @@ Coord MctsCpuPlayer::choseSquare(Game& game) {
       tree_root(std::make_unique<MctsNode>(*other.tree_root)) { // Deep copy of tree_root
     }
 
-    Coord MctsCpuPlayer3::choseSquare(Game& game) {
-        Coord last_move = {-10, -10};
+Coord MctsCpuPlayer3::choseSquare(Game& game) {
+    Coord last_move = {-10, -10};
 
-        if (!game.flips.empty()) {
-            last_move = game.flips.top().back();
-        }
+    if (!game.flips.empty()) {
+        last_move = game.flips.top().back();
+    }
 
 
-        this->step(last_move);
-        // std::cout << "new root is " << this->tree_root->move.toString() << "\n new root has children\n";
-        // for (auto&c : this->tree_root->children) {
-        //     std::cout << c->move.toString() << " ";
-        // }
-        // std::cout << "\n";
+    this->step(last_move);
+    // std::cout << "new root is " << this->tree_root->move.toString() << "\n new root has children\n";
+    // for (auto&c : this->tree_root->children) {
+    //     std::cout << c->move.toString() << " ";
+    // }
+    // std::cout << "\n";
 
-        std::vector<MctsNode*> curr;
+    std::vector<MctsNode*> curr;
+    curr.reserve(10);
 
     int iter_count = 0;
 
@@ -514,9 +515,9 @@ Coord MctsCpuPlayer::choseSquare(Game& game) {
         //     std::cout << c->move.toString() << "= " << c->wins << " ,";
         // }
         // std::cout << "\n";
-    
+
         for (auto& n: curr) {
-            game.play(n->move);
+            game.play(n->move, true);
         }
 
         curr.back()->expand_simulate_backpropagte(game, this);
@@ -525,19 +526,19 @@ Coord MctsCpuPlayer::choseSquare(Game& game) {
         //     std::cout << c->move.toString() << "= " << c->wins << " ,";
         // }
         // std::cout << "\n";
-        
+
         // start at first index to skip undoing root
         for (int i = 1; i < curr.size(); i++) {
             game.undo();
         }
         if (game.players[0]->piece_count != safe) {
             std::cout << "broke at 2\n";
-        
+
             for (auto c: curr) {
                 std::cout << c->move.toString() << "= " << c->wins << " ,";
             }
             std::cout << "\n";
-            
+
 
             exit(1);
         }

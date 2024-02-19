@@ -171,12 +171,12 @@ float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
         for (int i = 0; i < GAME_N; i++) {
             for (int j = 0; j < GAME_N; j++) {
                 if (game->board[Coord{i, j}] != game->board.empty_square_marker
-                        || game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()){
+                        || game->flipedFromMove(Coord{i, j}, game->curr_idx) == 0){
                     continue;
                 }
 
                 auto fit = 0;
-                for (auto move: game->flipedFromMove({i, j}, game->curr_idx)) {
+                for (auto move: game->to_flip) {
                     fit += self->aval_matrix[move.row][move.col];
                 }
 
@@ -233,7 +233,7 @@ float rollout2(const Game& g, const MinMaxCpuPlayer *const self) {
         }
         sq = tmp;
         last_played = game->curr_idx;
-        p = game->play(sq);
+        p = game->play(sq, true);
     }
 
     float dif = game->players[turn]->piece_count > game->players[!turn]->piece_count;
@@ -264,7 +264,7 @@ float rollout(const Game& g, const MinMaxCpuPlayer *const self) {
         for (int i = 0; i < GAME_N; i++) {
             for (int j = 0; j < GAME_N; j++) {
                 if (game->board[Coord{i, j}] != game->board.empty_square_marker
-                        || game->flipedFromMove(Coord{i, j}, game->curr_idx).empty()){
+                        || game->flipedFromMove(Coord{i, j}, game->curr_idx) == 0){
                     continue;
                 }
 
@@ -314,7 +314,7 @@ float rollout(const Game& g, const MinMaxCpuPlayer *const self) {
         }
         sq = tmp;
         last_played = game->curr_idx;
-        p = game->play(sq);
+        p = game->play(sq, true);
     }
 
     int dif = game->players[turn]->piece_count - game->players[!turn]->piece_count;

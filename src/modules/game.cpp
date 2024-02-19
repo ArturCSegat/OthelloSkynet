@@ -1,5 +1,6 @@
 #include "../../includes/board.h"
 #include "../../includes/game.h"
+#include <chrono>
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -21,24 +22,26 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
 
     players[0] = std::move(player1);
     players[1] = std::move(player2);
+    this->to_flip = {};
+    this->to_flip.reserve(16);
 
     curr_idx = 0;
     running = true;
     play_count = 0;
 }
 
-std::vector<Coord> Game::flipedFromMove(Coord move, int player) const{
-    std::vector<Coord> fill;
+int Game::flipedFromMove(Coord move, int player) {
+    this->to_flip.clear();
 
-    board.playVertical(move, players[curr_idx], players[!curr_idx], fill);
-    board.playHorizontal(move, players[curr_idx], players[!curr_idx], fill);
-    board.playDiegonalLR(move, players[curr_idx], players[!curr_idx], fill);
-    board.playDiegonalRL(move, players[curr_idx], players[!curr_idx], fill);
+    board.playVertical(move, players[curr_idx], players[!curr_idx], this->to_flip);
+    board.playHorizontal(move, players[curr_idx], players[!curr_idx], this->to_flip);
+    board.playDiegonalLR(move, players[curr_idx], players[!curr_idx], this->to_flip);
+    board.playDiegonalRL(move, players[curr_idx], players[!curr_idx], this->to_flip);
     
-    return fill;
+    return this->to_flip.size();
 }
 
-int Game::play(Coord c) {
+int Game::play(Coord c, bool calc) {
     if (c.col < -1 || c.row < -1 || c.col > GAME_N - 1 || c.row > GAME_N - 1) {
         return 0;
     }
@@ -55,9 +58,11 @@ int Game::play(Coord c) {
         return 0;
     }
 
-    std::vector<Coord> to_flip = flipedFromMove(c, this->curr_idx);
+    if (calc) {
+        flipedFromMove(c, this->curr_idx);
+    }
 
-    if (to_flip.empty()) {
+    if (this->to_flip.size() == 0) {
         return 0;
     }
 
