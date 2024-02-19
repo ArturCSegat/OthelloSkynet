@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#define SIM_COUNT 3
+#define SIM_COUNT 5
 
 MctsNode::MctsNode(Coord move, int played_by, int wins) 
     : move(move)

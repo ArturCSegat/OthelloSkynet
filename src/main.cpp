@@ -9,10 +9,10 @@
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<BetterCpuPlayer>(BetterCpuPlayer('o'));
-    auto p2 = std::make_unique<MctsCpuPlayer3>(MctsCpuPlayer3('x', rollout, 1500, 0));
+    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, 4));
+    auto p2 = std::make_unique<MctsCpuPlayer3>(MctsCpuPlayer3('x', rollout, 3500, 0));
 
-    auto g = Game(std::move(p2), std::move(p1), ' ');
+    auto g = Game(std::move(p1), std::move(p2), ' ');
 
     auto p1_time = 0;
     auto p2_time = 0;
