@@ -205,3 +205,159 @@ void Board::playHorizontal(Coord c, const std::unique_ptr<Player>& p, const std:
         fill.push_back(Coord{c.row, i});
     }
 }
+
+
+bool Board::willFlipInHorizontal(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const {
+    bool fliped = false;
+    for (int i = c.col - 1; i >= 0; i--) {
+        if (board[c.row][i] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if (board[c.row][i] == empty_square_marker || i == 0) {
+            fliped = false;
+            break;
+        }
+
+        fliped = true;
+    }
+
+    for (int i = c.col + 1; i < GAME_N; i++) {
+        if (board[c.row][i] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if (board[c.row][i] == empty_square_marker || i == GAME_N - 1) {
+            fliped = false;
+            break;
+        }
+
+        fliped = true;
+    }
+    return false;
+}
+
+bool Board::willFlipInVertical(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const {
+    bool fliped = false;
+    for (int i = c.row - 1; i >= 0; i--) {
+        if (board[i][c.col] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if(board[i][c.col] == empty_square_marker || i == 0) {
+            fliped = false;
+            break;
+        }
+
+        fliped = true;
+    }
+
+    for (int i = c.row + 1; i < GAME_N; i++) {
+        if (board[i][c.col] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if(board[i][c.col] == empty_square_marker || i == GAME_N - 1) {
+            fliped = false;
+            break;
+        }
+
+        fliped = true;
+    }
+    return false;
+}
+
+
+bool Board::willFlipInDiegonalLR(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const {
+    int j = c.col - 1;
+    bool fliped = false;
+    for(int i = c.row - 1; i >= 0 && j >= 0; i--) {
+        if (board[i][j] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if (board[i][j] == empty_square_marker || i == 0 || j == 0) {
+            fliped = false;
+            break;
+        }
+
+        fliped = true;
+        j--;
+    }
+
+    j = c.col + 1;
+    for(int i = c.row + 1; i < GAME_N && j < GAME_N; i++) {
+        if (board[i][j] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if (board[i][j] == empty_square_marker || i == GAME_N - 1 || j == GAME_N - 1) {
+            fliped = false;
+            break;
+        }
+
+        // board[i][j] = p->piece;
+        fliped = true;
+        j++;
+    }
+    return false;
+}
+
+
+bool Board::willFlipInDiegonalRL(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const {
+    int j = c.col + 1;
+    bool fliped = false;
+    for(int i = c.row - 1; i >= 0 && j < GAME_N; i--) {
+        if (board[i][j] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if (board[i][j] == empty_square_marker || i == 0 || j == GAME_N - 1) {
+            fliped = false;
+            break;
+        }
+
+        fliped = true;
+        j++;
+    }
+
+    j = c.col - 1;
+    for(int i = c.row + 1; i < GAME_N && j >= 0; i++) {
+        if (board[i][j] == p->piece) {
+            if (fliped) {
+                return true;
+            }
+            break;
+        }
+
+        if (board[i][j] == empty_square_marker || i == GAME_N - 1 || j == 0) {
+            fliped = false;
+            break;
+        }
+
+        fliped = true;
+        j--;
+    }
+    return false;
+}

@@ -21,10 +21,19 @@ public:
     char const& operator[] (Coord c) const;
     void display() const;
     
+    // fills fill with the coords to flip
     void playDiegonalLR(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
     void playDiegonalRL(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
     void playHorizontal(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
     void playVertical(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2, std::vector<Coord>& fill) const;
+
+    // returns if this direction is valid
+    bool willFlipInDiegonalLR(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const;
+    bool willFlipInDiegonalRL(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const;
+    bool willFlipInHorizontal(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const;
+    bool willFlipInVertical(Coord c, const std::unique_ptr<Player>& p, const std::unique_ptr<Player>& p2) const;
+    
+
 };
 
 #endif

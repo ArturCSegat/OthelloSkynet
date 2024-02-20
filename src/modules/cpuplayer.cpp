@@ -197,7 +197,7 @@ Coord BetterCpuPlayer::choseSquare(Game& game) {
 
 int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game) {
     // std::cout << "move: " << move.toString() << " avaliateMoveTillEnd\n";
-    game->play(move, true);
+    game->play(move);
     Coord sq;
     do{
         Coord tmp = CpuPlayer::choseSquare(*game);
@@ -206,7 +206,7 @@ int BetterCpuPlayer::avaliateMoveTillEnd(Coord move, std::unique_ptr<Game> game)
             break;
         }
         sq = tmp;
-    }while(game->play(sq, true) != -2);
+    }while(game->play(sq) != -2);
 
     int this_idx = game->players[1]->piece == this->piece;
 
@@ -246,7 +246,7 @@ Coord MaybeEvenBetterCpuPlayer::choseSquare(Game& game) {
 }
 
 int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique_ptr<Game> game) {
-    game->play(move, true);
+    game->play(move);
     
     int aval_sum;
     
@@ -264,7 +264,7 @@ int MaybeEvenBetterCpuPlayer::avaliateShallowTreeTillEnd(Coord move, std::unique
     return aval_sum;
 }
 
-MinMaxCpuPlayer::MinMaxCpuPlayer(char p, float(*aval)(const Game& game, const MinMaxCpuPlayer *const self), int max_depth) : BetterCpuPlayer(p) { 
+MinMaxCpuPlayer::MinMaxCpuPlayer(char p, float(*aval)(Game& game, const MinMaxCpuPlayer *const self), int max_depth) : BetterCpuPlayer(p) { 
     this->aval = aval;
     this->max_depth = max_depth;
 };
@@ -355,7 +355,7 @@ float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int 
     // std::cout << "MAx turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
     float max_aval = MAXFLOAT * -1;
     float aval;
-    int r = game.play(move, true);
+    int r = game.play(move);
 
     if (r == -2 || depth == this->max_depth) {
         return this->aval(game, this);
@@ -389,7 +389,7 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
     // std::cout << "Min turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
     float min_aval = MAXFLOAT;
     float aval;
-    int r = game.play(move, true);
+    int r = game.play(move);
 
     if (r == -2 || depth == this->max_depth) {
         return this->aval(game, this);
@@ -418,7 +418,7 @@ float MinMaxCpuPlayer::Min(Game& game, Coord move, float alpha, float beta, int 
 
 MctsCpuPlayer::MctsCpuPlayer(
         char p,
-        float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
+        float(*aval)(Game& game, const MinMaxCpuPlayer *const self),
         int max_depth,
         int idx
         )
@@ -439,7 +439,7 @@ Coord MctsCpuPlayer::choseSquare(Game& game) {
             // }
             root.select(curr);
             for (auto& n: curr) {
-                game.play(n->move, true);
+                game.play(n->move);
             }
 
             curr.back()->expand_simulate_backpropagte(game, this);
@@ -469,7 +469,7 @@ Coord MctsCpuPlayer::choseSquare(Game& game) {
 
     MctsCpuPlayer3::MctsCpuPlayer3(
             char p,
-            float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
+            float(*aval)(Game& game, const MinMaxCpuPlayer *const self),
             int max_depth,
             int idx
             )
@@ -517,7 +517,7 @@ Coord MctsCpuPlayer3::choseSquare(Game& game) {
         // std::cout << "\n";
 
         for (auto& n: curr) {
-            game.play(n->move, true);
+            game.play(n->move);
         }
 
         curr.back()->expand_simulate_backpropagte(game, this);

@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#define SIM_COUNT 5
+#define SIM_COUNT 12
 
 MctsNode::MctsNode(Coord move, int played_by, int wins) 
     : move(move)
@@ -46,7 +46,6 @@ void MctsNode::select(std::vector<MctsNode*>& fill) {
 
     for (int i = 0; i < this->children.size(); i++) {
         if (this->children[i]->terminal == true) {
-            // std::cout << "lol\n";
             continue;
         }
 
@@ -58,7 +57,6 @@ void MctsNode::select(std::vector<MctsNode*>& fill) {
     }
 
     if (idx == -1) {
-        std::cout << "porra\n";
         if (this->parent == NULL || backs == BACKTRACK_LIMIT) {
             backs = 0;
             return;
@@ -88,13 +86,13 @@ void MctsNode::expand_simulate_backpropagte(Game& game, MctsCpuPlayer * self) {
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
             if (game.board[Coord{i, j}] != game.board.empty_square_marker
-                    || game.flipedFromMove(Coord{i, j}, game.curr_idx) == 0
+                    || game.isValid(Coord{i, j}, game.curr_idx) == false
                     || has_child_move(this, {i, j})
                 ){
                 continue;
             }
             int played_by = game.curr_idx;
-            int p = game.play({i, j}, false);
+            int p = game.play({i, j});
             int playout_wins = 0;
 
             for (int count = 0; count < SIM_COUNT; count++) {
@@ -111,7 +109,6 @@ void MctsNode::expand_simulate_backpropagte(Game& game, MctsCpuPlayer * self) {
             game.undo();
             
             if (p == -2) {
-                std::cout << "caralho\n";
                 this->children.back()->terminal = true;
             }
 

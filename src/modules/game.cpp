@@ -30,6 +30,15 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
     play_count = 0;
 }
 
+bool Game::isValid(Coord move, int played_idx) const {
+
+    return 
+    board.willFlipInVertical(move, players[curr_idx], players[!curr_idx])   ||
+    board.willFlipInHorizontal(move, players[curr_idx], players[!curr_idx]) ||
+    board.willFlipInDiegonalLR(move, players[curr_idx], players[!curr_idx]) ||
+    board.willFlipInDiegonalRL(move, players[curr_idx], players[!curr_idx]) ;
+}
+
 int Game::flipedFromMove(Coord move, int player) {
     this->to_flip.clear();
 
@@ -41,7 +50,7 @@ int Game::flipedFromMove(Coord move, int player) {
     return this->to_flip.size();
 }
 
-int Game::play(Coord c, bool calc) {
+int Game::play(Coord c) {
     if (c.col < -1 || c.row < -1 || c.col > GAME_N - 1 || c.row > GAME_N - 1) {
         return 0;
     }
@@ -58,9 +67,7 @@ int Game::play(Coord c, bool calc) {
         return 0;
     }
 
-    if (calc) {
-        flipedFromMove(c, this->curr_idx);
-    }
+    flipedFromMove(c, this->curr_idx);
 
     if (this->to_flip.size() == 0) {
         return 0;
@@ -119,7 +126,7 @@ void Game::undo() {
     this->curr_idx =! this->curr_idx;
     this->play_count --;
 
-    // std::cout << "undone: " << played.toString() << "\n";
+    // std::cout << "undid: " << played.toString() << "\n";
 }
 
 std::unique_ptr<Game> Game::clone() const{
@@ -145,6 +152,23 @@ std::unique_ptr<Game> Game::clone() const{
     g->running = running;
 
     return g;
+}
+
+void Game::clone_into(Game& into) const {
+    into.players[0]->piece_count = this->players[0]->piece_count;
+    into.players[1]->piece_count = this->players[1]->piece_count;
+
+    for (int i = 0; i < GAME_N; i++) {
+        for (int j = 0; j < GAME_N; j++) {
+            into.board[Coord{i, j}] = board[Coord{i, j}];
+            into.age_matrix[i][j] = age_matrix[i][j];
+        }
+    }
+
+    // g->flips = flips;
+    into.curr_idx = curr_idx;
+    into.play_count = play_count;
+    into.running = running;
 }
 
 void Game::endGame() {

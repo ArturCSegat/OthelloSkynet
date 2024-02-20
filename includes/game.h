@@ -21,14 +21,17 @@ public:
 
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
 
+    bool isValid(Coord move, int player_idx) const;
+
     // returns how many needs to be fliped and sets this->to_flip to the respective coords
     int flipedFromMove(Coord move, int player_idx);
 
     // plays the given Coord, if calc is true, will calculate this->to_flip, if you've just ran flipeFromMove for Coord c, set it to false
-    int play(Coord c, bool calc);
+    int play(Coord c);
     void undo();
 
     std::unique_ptr<Game> clone() const;
+    void clone_into(Game& into) const;
 
     void endGame();
 

@@ -9,8 +9,8 @@
 
 int main() {
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, 4));
-    auto p2 = std::make_unique<MctsCpuPlayer3>(MctsCpuPlayer3('x', rollout, 3500, 0));
+    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, 5));
+    auto p2 = std::make_unique<MctsCpuPlayer3>(MctsCpuPlayer3('x', rollout, 2000, 0));
 
     auto g = Game(std::move(p1), std::move(p2), ' ');
 
@@ -36,7 +36,7 @@ int main() {
 
         int fliped;
 
-        fliped = g.play(move, true);
+        fliped = g.play(move);
         auto time = (clock() - start) / CLOCKS_PER_SEC;
         std::cout << "took " << time << " seconds to play " << move.toString() << "\n";
         p1_time += time;
@@ -75,7 +75,7 @@ int main() {
             break;
         }
 
-        int over = g.play(cpu_move, true);
+        int over = g.play(cpu_move);
         time = (clock() - start) / CLOCKS_PER_SEC; 
         std::cout << "took " <<  time << " seconds to play " << cpu_move.toString() << "\n";
         p2_time += time;

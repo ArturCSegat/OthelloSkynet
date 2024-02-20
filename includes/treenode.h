@@ -10,7 +10,7 @@ class MctsCpuPlayer : public MinMaxCpuPlayer {
 public:
     MctsCpuPlayer(
             char p,
-            float(*rollout)(const Game& game, const MinMaxCpuPlayer *const self),
+            float(*rollout)(Game& game, const MinMaxCpuPlayer *const self),
             int max_depth,
             int game_idx
             );
@@ -48,7 +48,7 @@ class MctsCpuPlayer2 : public MinMaxCpuPlayer {
 public:
     MctsCpuPlayer2(
             char p,
-            float(*aval)(const Game& game, const MinMaxCpuPlayer *const self),
+            float(*aval)(Game& game, const MinMaxCpuPlayer *const self),
             int max_depth,
             int game_idx
     );
@@ -59,7 +59,7 @@ public:
 class MctsCpuPlayer3 : public MctsCpuPlayer {
 public:
   MctsCpuPlayer3(char p,
-                 float (*aval)(const Game& game, const MinMaxCpuPlayer *const self),
+                 float (*aval)(Game& game, const MinMaxCpuPlayer *const self),
                  int max_depth,
                  int idx);
 
