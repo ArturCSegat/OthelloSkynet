@@ -6,7 +6,8 @@
 #include <memory>
 #include <vector>
 
-#define SIM_COUNT 12
+#define SIM_COUNT 9
+#define EXPLOIT_EXPLORE 4
 
 MctsNode::MctsNode(Coord move, int played_by, int wins) 
     : move(move)
@@ -140,7 +141,7 @@ void MctsNode::self_aval(const Game * const game, const MctsCpuPlayer * self, in
         mod = 1;
     }
     
-    this->uct = (win_ratio + (3) * sqrt(log(this->parent->visit_count + 1) / (this->visit_count + 1))) * mod;
+    this->uct = (win_ratio + (EXPLOIT_EXPLORE) * sqrt(log(this->parent->visit_count + 1) / (this->visit_count + 1))) * mod;
 }
 
 
