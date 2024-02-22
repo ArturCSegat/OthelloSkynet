@@ -6,6 +6,9 @@
 #include <memory>
 #include <vector>
 
+#define SIM_COUNT 8
+#define EXPLOIT_EXPLORE 2.8
+
 class MctsCpuPlayer : public MinMaxCpuPlayer {
 public:
     MctsCpuPlayer(

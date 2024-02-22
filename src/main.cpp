@@ -7,10 +7,18 @@
 #include <iostream>
 #include <memory>
 
+#define MCTS_ITERS 2500
+#define MINMAX_DEPTH 5
+
 int main() {
+    std::cout << "MCTS_ITERS: " << MCTS_ITERS << "\n";
+    std::cout << "MCTS_SIMS: " << SIM_COUNT << "\n";
+    std::cout << "MCTS_EXPLORATION: " << EXPLOIT_EXPLORE << "\n\n";
+    std::cout << "MINMAX_DEPTH: " << MINMAX_DEPTH << "\n\n";
+
     srand (static_cast <unsigned> (time(0)));
-    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, 5));
-    auto p2 = std::make_unique<MctsCpuPlayer3>(MctsCpuPlayer3('x', rollout, 2000, 0));
+    auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, MINMAX_DEPTH));
+    auto p2 = std::make_unique<MctsCpuPlayer3>(MctsCpuPlayer3('x', rollout, MCTS_ITERS, 0));
 
     auto g = Game(std::move(p1), std::move(p2), ' ');
 

@@ -6,8 +6,6 @@
 #include <memory>
 #include <vector>
 
-#define SIM_COUNT 9
-#define EXPLOIT_EXPLORE 4
 
 MctsNode::MctsNode(Coord move, int played_by, int wins) 
     : move(move)
