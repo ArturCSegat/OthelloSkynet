@@ -1,5 +1,4 @@
-<div id="game-info" hx-get="/game" hx-trigger="update-cpu from:body delay:0.6s" hx-swap="outerHTML">
-    {% include "board.html" %}
+<div id="game-info">
     <div style="display: flex; flex-direction: column;">
         <p>player 1 piece count: {{ p1_count }}</p>
         <p>player 2 piece count: {{ p2_count }}</p>

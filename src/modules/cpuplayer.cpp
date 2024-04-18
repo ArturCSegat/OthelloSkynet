@@ -1,16 +1,12 @@
-#include "../../includes/treenode.h"
+#include "../../includes/mcts.h"
 #include "../../includes/cpuplayer.h"
 #include "../../includes/game.h"
-#include <array>
 #include <cmath>
-#include <math.h>
 #include <map>
 #include <memory>
 #include <iostream>
-#include <iomanip>
 #include <thread>
 #include <chrono>
-#include <queue>
 #include <vector>
 
 BadCpuPlayer::BadCpuPlayer(char p) : Player(p) {}
@@ -294,6 +290,8 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
                 auto p22 = game.players[1]->piece_count;
 
                 if (p1 != p12 || p2 != p22) {
+                    std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
+                    std::cout << "1\n";
                     std::cout << "\nerror\n\n";
                     std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
                     std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
@@ -326,12 +324,13 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
             float fit = Max(game, Coord{i, j}, MAXFLOAT * -1, MAXFLOAT, 0);
             game.undo();
 
-            // std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
 
             auto p12 = game.players[0]->piece_count;
             auto p22 = game.players[1]->piece_count;
 
             if (p1 != p12 || p2 != p22) {
+                std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
+                std::cout << "2\n";
                 std::cout << "\nerror\n\n";
                 std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
                 std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
@@ -423,67 +422,13 @@ MctsCpuPlayer::MctsCpuPlayer(
         int idx
         )
     : MinMaxCpuPlayer(p, aval, max_depth)
-    , game_idx(idx)
-{}
+{
+    this->tree_root = std::make_unique<MctsNode>(MctsNode({-10, -10}, idx, 0));
+}
+
+MctsCpuPlayer::MctsCpuPlayer(const MctsCpuPlayer& other) : MinMaxCpuPlayer(other), tree_root(std::make_unique<MctsNode>(*other.tree_root)) {};
 
 Coord MctsCpuPlayer::choseSquare(Game& game) {
-        auto root = MctsNode({-10, -10}, game.curr_idx, MAXFLOAT * -1); // bad move so it errors and keeps the turn on the same player
-        std::vector<MctsNode*> curr = {};
-
-        int iter_count = 0;
-
-        while(iter_count < this->max_depth) {
-            // std::cout << "pre select\n";
-            // for (auto const& c: root.children) {
-            //     std::cout << c->move.toString() << "> wins: " << c->wins << ", uct: " << c->uct << ", visits: " << c->visit_count << "\n"; 
-            // }
-            root.select(curr);
-            for (auto& n: curr) {
-                game.play(n->move);
-            }
-
-            curr.back()->expand_simulate_backpropagte(game, this);
-
-            // start at first index to skip undoing root
-            for (int i = 1; i < curr.size(); i++) {
-                game.undo();
-            }
-
-            curr.clear();
-            iter_count ++;
-        }
-
-        if (root.children.empty()) {
-            return {-1, -1};
-        }
-        for (auto const& c: root.children) {
-            std::cout << c->move.toString() << "> wins: " << c->wins << ", uct: " << c->uct << ", visits: " << c->visit_count << "\n"; 
-            for (auto const& cc: c->children) {
-                std::cout << cc->move.toString() << "> wins: " << cc->wins << ", uct: " << cc->uct << ", visits: " << cc->visit_count << "\n"; 
-            }
-        }
-        root.select(curr);
-
-        return curr[1]->move;
-    }
-
-    MctsCpuPlayer3::MctsCpuPlayer3(
-            char p,
-            float(*aval)(Game& game, const MinMaxCpuPlayer *const self),
-            int max_depth,
-            int idx
-            )
-            : MctsCpuPlayer(p, aval, max_depth, idx) 
-    {
-        this->tree_root = std::make_unique<MctsNode>(MctsNode({-10, -10}, idx, 0));
-    }
-
-    MctsCpuPlayer3::MctsCpuPlayer3(const MctsCpuPlayer3& other) :
-      MctsCpuPlayer(other), // Call base class copy constructor
-      tree_root(std::make_unique<MctsNode>(*other.tree_root)) { // Deep copy of tree_root
-    }
-
-Coord MctsCpuPlayer3::choseSquare(Game& game) {
     Coord last_move = {-10, -10};
 
     if (!game.flips.empty()) {
@@ -579,7 +524,7 @@ Coord MctsCpuPlayer3::choseSquare(Game& game) {
     return move;
 }
 
-void MctsCpuPlayer3::step(Coord move) {
+void MctsCpuPlayer::step(Coord move) {
     for (int i = 0; i < this->tree_root->children.size(); i++) {
         if (this->tree_root->children[i]->move == move) {
             this->tree_root = std::move(this->tree_root->children[i]);

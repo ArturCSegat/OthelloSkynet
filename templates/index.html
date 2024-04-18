@@ -3,58 +3,98 @@
         <title>Othello Skynet</title>
         <script src="https://unpkg.com/htmx.org@1.9.8"></script>
         <script>
-            function handlePlay(x, y) {
-                htmx.ajax("GET", "/play/"+x+"/"+y, {target:"#game-info", swap:"outerHTML"});
-                new Promise(r => setTimeout(r, 500)).then(() => {
-                    htmx.ajax("GET", "/game", {target:"#game-info", swap:"outerHTML"});
-                });
+            function create_game() {
+                const bot_id = parseInt(document.getElementById("botSelection").value)
+                let arg = -1;
+                if (bot_id === 4) {
+                    let depth = prompt("Enter the minimax max depth (max:8)")
+                    depth = parseInt(depth)
+                    if (isNaN(depth) || depth < 0) {
+                        alert("bad depth")
+                        location.reload()
+                    }
+                    if (depth > 8) {
+                        depth = 8
+                    }
+                    arg = depth
+                }
+                if (bot_id === 5) {
+                    let depth = prompt("Enter the mcts iter_count (max:25000)")
+                    depth = parseInt(depth)
+                    if (isNaN(depth) || depth < 0) {
+                        alert("bad iter count")
+                        location.reload()
+                    }
+                    if (depth > 25000) {
+                        depth = 25000
+                    }
+                    if (depth <= 8) {
+                        depth = 9
+                    }
+                    arg = depth
+                }
+                htmx.ajax("GET", "/new-game/"+bot_id+"/"+arg, "#main-content");
             }
         </script>
         <style>
-            body  {
+
+            #game-info {
                 display: flex;
                 flex-direction: column;
             }
 
-        #game-info {
-            display: flex;
-            flex-direction: row;
-        }
-
-        #board {
-            display: grid;
-            grid-template: auto auto auto auto auto auto auto auto / auto auto auto auto auto auto auto auto;
-            width: 50%;
-            height: 50%;
-        }
-
-        .square {
-            height: 100px;
-            width: 100px;
-            margin: 3px;
-            border: 1px solid black;
-            border-radius: 10px;
-        }
+            #board {
+                display: grid;
+                grid-template: auto auto auto auto auto auto auto auto / auto auto auto auto auto auto auto auto;
+                width: 50%;
+                height: 50%;
+            }
+    
+            .square {
+                height: 100px;
+                width: 100px;
+                margin: 3px;
+                border: 1px solid black;
+                border-radius: 10px;
+            }
+    
+    
+            .game {
+                display: flex;
+                flex-direction: row;
+            }
+    
+            .bttn {
+                width: fit-content;
+                height: auto;
+                border: 1px solid black;
+                padding: 2px;
+                margin: 10px;
+            }
+    
+            .main-content {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         </style>
     </head>
     <body>  
         <h1>Othello Engine</h1>
-        
-        {% include "game-info.html" %}
-        <div
-            hx-get="/play/-1/-1"
-            hx-trigger="click"
-            hx-target="#game-info"
-            hx-swap="outerHTML"
-            style="  
-                width: fit-content;
-                height: auto;
-                border: 1px solid black;
-                border-radius: 10px;
-            "
-        >
-            Pass Turn
+        <div class="main-content">
+            <h2>Select the opponnet</h2>
 
+            <select id="botSelection"
+                style="
+                margin: 10px;
+                ">
+                <option value="1">CPU Player</option>
+                <option value="2">Better CPU Player</option>
+                <option value="3">Maybe Even Better CPU Player</option>
+                <option value="4">Min-Max CPU Player</option>
+                <option value="5">MCTS CPU Player</option>
+            </select>
+            <button onclick="create_game()" style="margin: 10px;">Create Game</button>
         </div>
     </body>
 </html>
