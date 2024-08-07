@@ -17,12 +17,35 @@ int main() {
     auto p1 = new_player('o');
     auto p2 = new_cpu_player('x');
     std::vector<std::unique_ptr<Game>> games = {};
+    std::vector<std::string> cpfs = {};
 
     auto g = Game(std::move(p1), std::move(p2), ' ');
     
     crow::App<crow::CookieParser> app;
 
     CROW_ROUTE(app, "/")([&g](){
+            inja::Environment env {"templates/"};
+
+            inja::json data;
+            auto page = env.render_file("intro.html", data);
+
+            return page;
+            });
+    CROW_ROUTE(app, "/valid-cpf/<string>")([&g, &cpfs](std::string cpf){
+            crow::response res;
+            for (const std::string x: cpfs) {
+                if (x == cpf) {
+                    res.code = 401;
+                    return res;
+                }
+            }
+            res.code = 200;
+            cpfs.push_back(cpf);
+            return res;
+
+
+            });
+    CROW_ROUTE(app, "/game-creator")([&g](){
             inja::Environment env {"templates/"};
 
             inja::json data;
