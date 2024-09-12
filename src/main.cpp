@@ -1,8 +1,6 @@
 #include "../includes/game.h"
 #include "../includes/cpuplayer.h"
-#include <algorithm>
 #include <any>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -59,10 +57,10 @@ int main() {
             
             std::vector<std::any> args = {'x'};
             if (id == 4) {
-                args.push_back(rollout);
+                args.push_back(aval);
                 args.push_back(arg);
             } else if (5) {
-                args.push_back(aval2);
+                args.push_back(rollout);
                 args.push_back(arg);
                 args.push_back(0); // suposed to be the idx of the mcts player, not actully used for anything
             }

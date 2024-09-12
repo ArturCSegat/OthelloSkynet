@@ -310,6 +310,8 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
     }
     float max_aval = std::numeric_limits<float>::max();
     auto max_move = Coord{-1, -1};
+    
+    int stack_start = game.flips.size();
 
     for (int i = 0; i < GAME_N; i++) {
         for (int j = 0; j < GAME_N; j++) {
@@ -332,6 +334,7 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
                 std::cout << "Move: " << Coord{i, j}.toString() << " aval: " << fit << "\n";
                 std::cout << "2\n";
                 std::cout << "\nerror\n\n";
+                std::cout << "stack len start:" << stack_start << " stack len now: " << game.flips.size() << "\n";
                 std::cout << "p1 :" << p1 << " p12: " << p12 << "\n";
                 std::cout << "p2 :" << p2 << " p22: " << p22 << "\n";
                 std::cout << "\nerror\n\n";
@@ -350,8 +353,8 @@ Coord MinMaxCpuPlayer::choseSquare(Game& game) {
 
 float MinMaxCpuPlayer::Max(Game& game, Coord move, float alpha, float beta, int depth) {
     // std::cout << "Max: move: " << move.toString() << ", depth: " << depth << "\n";
-
     // std::cout << "MAx turn: " << game.curr_idx <<  "depth: " << depth <<"\n";
+    
     float max_aval = MAXFLOAT * -1;
     float aval;
     int r = game.play(move);

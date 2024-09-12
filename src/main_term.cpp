@@ -17,10 +17,10 @@ int main() {
     std::cout << "MINMAX_DEPTH: " << MINMAX_DEPTH << "\n\n";
 
     srand (static_cast <unsigned> (time(0)));
-    // auto p1 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, MINMAX_DEPTH));
-    auto p1 = new_player('o');
+    auto p2 = std::make_unique<MinMaxCpuPlayer>(MinMaxCpuPlayer('o', aval, MINMAX_DEPTH));
+    // auto p1 = new_player('o');
     // auto p2 = std::make_unique<MctsCpuPlayer>(MctsCpuPlayer('x', rollout, MCTS_ITERS, 0));
-    auto p2 = new_player('x');
+    auto p1 = new_player('x');
 
     auto g = Game(std::move(p1), std::move(p2), ' ');
 
