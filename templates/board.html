@@ -10,6 +10,8 @@
             style='background-color: 
                 {% if square == empty %}
                     green 
+                {% else if square == available %}
+                   lightgreen 
                 {% else if square == player1 %}
                     white
                 {% else %}

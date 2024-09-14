@@ -33,10 +33,24 @@ Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, cha
 bool Game::isValid(Coord move, int played_idx) const {
 
     return 
+    (
     board.willFlipInVertical(move, players[curr_idx], players[!curr_idx])   ||
     board.willFlipInHorizontal(move, players[curr_idx], players[!curr_idx]) ||
     board.willFlipInDiegonalLR(move, players[curr_idx], players[!curr_idx]) ||
-    board.willFlipInDiegonalRL(move, players[curr_idx], players[!curr_idx]) ;
+    board.willFlipInDiegonalRL(move, players[curr_idx], players[!curr_idx])
+    ) && board[move] == board.empty_square_marker;
+}
+
+std::vector<Coord> Game::available() const {
+    std::vector<Coord> v = {};
+    for (int i = 0; i<GAME_N; i++) {
+        for (int j = 0; j<GAME_N; j++) {
+            if (isValid({i, j}, this->curr_idx)) {
+                v.push_back({i, j});
+            }
+        }
+    }
+    return v;
 }
 
 int Game::flipedFromMove(Coord move, int player) {

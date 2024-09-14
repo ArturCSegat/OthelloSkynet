@@ -1,6 +1,8 @@
 #include "../includes/game.h"
 #include "../includes/cpuplayer.h"
+#include <algorithm>
 #include <any>
+#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,16 +14,12 @@
 
 
 int main() {
-    auto p1 = new_player('o');
-    auto p2 = new_cpu_player('x');
     std::vector<std::unique_ptr<Game>> games = {};
     std::vector<std::string> cpfs = {};
 
-    auto g = Game(std::move(p1), std::move(p2), ' ');
-    
     crow::App<crow::CookieParser> app;
 
-    CROW_ROUTE(app, "/")([&g](){
+    CROW_ROUTE(app, "/")([](){
             inja::Environment env {"templates/"};
 
             inja::json data;
@@ -29,7 +27,7 @@ int main() {
 
             return page;
             });
-    CROW_ROUTE(app, "/valid-cpf/<string>")([&g, &cpfs](std::string cpf){
+    CROW_ROUTE(app, "/valid-cpf/<string>")([&cpfs](std::string cpf){
             crow::response res;
             for (const std::string x: cpfs) {
                 if (x == cpf) {
@@ -43,7 +41,7 @@ int main() {
 
 
             });
-    CROW_ROUTE(app, "/game-creator")([&g](){
+    CROW_ROUTE(app, "/game-creator")([](){
             inja::Environment env {"templates/"};
 
             inja::json data;
@@ -65,17 +63,23 @@ int main() {
                 args.push_back(0); // suposed to be the idx of the mcts player, not actully used for anything
             }
             
-            
             games.push_back(std::make_unique<Game>(new_game(0, id, {'o'}, args)));
             int index = games.size() - 1;
             std::string cookie = "game=" + std::to_string(index);
             res.set_header("Set-Cookie",  cookie+"; Path=/");
 
             inja::json data;
-            data["board"] = games[index]->board.board;
+
+            std::array<std::array<char, 8>, 8> b = games[index]->board.board;
+            for (auto c: games[index]->available()) {
+                b[c.row][c.col] = 'a';
+            }
+
+            data["board"] = b;
             data["empty"] = games[index]->board.empty_square_marker;
             data["player1"] = games[index]->players[0]->piece;
             data["player2"] = games[index]->players[1]->piece;
+            data["available"] = 'a';
             data["p1_count"] = games[index]->players[0]->piece_count;
             data["p2_count"] = games[index]->players[1]->piece_count;
             data["turn"] = games[index]->players[games[index]->curr_idx]->piece;
@@ -98,6 +102,7 @@ int main() {
 
                 data["player1"] = g->players[0]->piece;
                 data["player2"] = g->players[1]->piece;
+                data["available"] = 'a';
                 data["p1_count"] = g->players[0]->piece_count;
                 data["p2_count"] = g->players[1]->piece_count;
                 
@@ -124,11 +129,17 @@ int main() {
             }
 
             int over = g->play(Coord{i, j});
+
+            // std::array<std::array<char, 8>, 8> b = games[index]->board.board;
+            // for (auto c: games[index]->available()) {
+            //     b[c.row][c.col] = 'a';
+            // }
             
             data["board"] = g->board.board;
             data["empty"] = g->board.empty_square_marker;
             data["player1"] = g->players[0]->piece;
             data["player2"] = g->players[1]->piece;
+            data["available"] = 'a';
             data["p1_count"] = g->players[0]->piece_count;
             data["p2_count"] = g->players[1]->piece_count;
             data["turn"] = g->players[g->curr_idx]->piece;
@@ -150,6 +161,7 @@ int main() {
             if (g->isOver()) {
                 data["player1"] = g->players[0]->piece;
                 data["player2"] = g->players[1]->piece;
+                data["available"] = 'a';
                 data["p1_count"] = g->players[0]->piece_count;
                 data["p2_count"] = g->players[1]->piece_count;
                 
@@ -174,13 +186,22 @@ int main() {
             }
 
             if (g->players[g->curr_idx]->piece != 'o') {
-                g->play(g->players[g->curr_idx]->choseSquare(*g));
+                Coord move = g->players[g->curr_idx]->choseSquare(*g);
+                std::cout << "bot played move: " << move.toString() << "\n";
+                g->play(move);
             }
 
-            data["board"] = g->board.board;
+            
+            std::array<std::array<char, 8>, 8> b = g->board.board;
+            for (auto c: g->available()) {
+                b[c.row][c.col] = 'a';
+            }
+
+            data["board"] = b;
             data["empty"] = g->board.empty_square_marker;
             data["player1"] = g->players[0]->piece;
             data["player2"] = g->players[1]->piece;
+            data["available"] = 'a';
             data["p1_count"] = g->players[0]->piece_count;
             data["p2_count"] = g->players[1]->piece_count;
             data["turn"] = g->players[g->curr_idx]->piece;

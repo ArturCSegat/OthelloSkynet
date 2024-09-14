@@ -22,6 +22,7 @@ public:
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
 
     bool isValid(Coord move, int player_idx) const;
+    std::vector<Coord> available() const;
 
     // returns how many needs to be fliped and sets this->to_flip to the respective coords
     int flipedFromMove(Coord move, int player_idx);
