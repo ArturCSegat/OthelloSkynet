@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/htmx.org@1.9.8"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Como Jogar Othello</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        header h1 {
+            color: white;
+        }
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(8, 40px);
+            gap: 1px;
+            margin: 20px 0;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: green;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+        }
+        .cell.white {
+            background-color: white;
+        }
+        .cell.black {
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Como Jogar Othello</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Regras Básicas</h2>
+            <p>Othello é um jogo de tabuleiro estratégico para dois jogadores. O objetivo é ter a maioria das peças da sua cor no tabuleiro ao final do jogo.</p>
+            <ul>
+                <li>Cada jogador escolhe uma cor, preto ou branco.</li>
+                <li>O jogo começa com duas peças brancas e duas peças pretas dispostas em um padrão de cruz no centro do tabuleiro.</li>
+                <li>Os jogadores se revezam colocando uma peça da sua cor no tabuleiro, de forma que um ou mais peças do oponente sejam flanqueadas pelas peças do jogador atual.</li>
+                <li>Todas as peças do oponente que estão entre a peça recém-colocada e outra peça do jogador atual são viradas para a cor do jogador atual.</li>
+                <li>O jogo continua até que o tabuleiro esteja cheio ou nenhum dos jogadores possa fazer um movimento válido.</li>
+                <li>O jogador com a maioria das peças da sua cor no tabuleiro vence.</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Configuração Inicial</h2>
+            <div class="board">
+                <!-- Linha 1 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <!-- Linha 2 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <!-- Linha 3 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <!-- Linha 4 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell white"></div>
+                <div class="cell black"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <!-- Linha 5 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell black"></div>
+                <div class="cell white"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <!-- Linha 6 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <!-- Linha 7 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <!-- Linha 8 -->
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+            </div>
+        </section>
+        <section>
+            <h2>Passo a Passo das Jogadas</h2>
+            <p>Veja abaixo um exemplo de como as jogadas podem se desenvolver:</p>
+            <ul>
+                <li>Jogador 1 (preto) coloca uma peça na posição E3, flanqueando uma peça branca entre E3 e E4.</li>
+                <li>Jogador 2 (branco) coloca uma peça na posição F3, flanqueando uma peça preta entre F3 e E4.</li>
+                <li>Jogador 1 (preto) coloca uma peça na posição D3, flanqueando uma peça branca entre D3 e E4.</li>
+                <li>Jogador 2 (branco) coloca uma peça na posição F5, flanqueando uma peça preta entre F5 e E5.</li>
+                <li>Continue esse processo até que o tabuleiro esteja cheio ou nenhum jogador possa fazer um movimento válido.</li>
+            </ul>
+            <p>É importante planejar suas jogadas com antecedência e pensar nas possíveis respostas do seu oponente. Controlar os cantos e bordas do tabuleiro pode ser uma estratégia eficaz para garantir a vitória.</p>
+        </section>
+        <section>
+            <h2>Dicas e Estratégias</h2>
+            <ul>
+                <li>Tente controlar os cantos do tabuleiro, pois as peças nesses locais não podem ser viradas.</li>
+                <li>Pense alguns movimentos à frente e tente prever as respostas do seu oponente.</li>
+                <li>Evite colocar peças em posições vulneráveis que possam ser facilmente capturadas pelo oponente.</li>
+                <li>Utilize as bordas do tabuleiro para limitar as opções do seu oponente.</li>
+            </ul>
+        </section>
+
+
+        <style>
+            #redirect {
+                width: 100%;
+                height: 36px;
+                background: green;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+        <script>
+            function TestaCPF(strCPF) { // copiado de https://www.devmedia.com.br/validar-cpf-com-javascript/23916
+                var Soma;
+                var Resto;
+                Soma = 0;
+                if (strCPF == "00000000000") return false;
+
+                for (i=1; i<=9; i++) Soma = Soma + parseInt(strCPF.substring(i-1, i)) * (11 - i);
+                Resto = (Soma * 10) % 11;
+
+                if ((Resto == 10) || (Resto == 11))  Resto = 0;
+                if (Resto != parseInt(strCPF.substring(9, 10)) ) return false;
+
+                Soma = 0;
+                for (i = 1; i <= 10; i++) Soma = Soma + parseInt(strCPF.substring(i-1, i)) * (12 - i);
+                Resto = (Soma * 10) % 11;
+
+                if ((Resto == 10) || (Resto == 11))  Resto = 0;
+                if (Resto != parseInt(strCPF.substring(10, 11) ) ) return false;
+                return true;
+            }
+
+
+            function redirect() {
+                const cpf = prompt("Antes, por favor entre com seu CPF");
+                if (!TestaCPF(cpf)) {
+                    alert("Esse CPF é invalido, entre com um cpf real");
+                    return
+                }
+                fetch(`/valid-cpf/${cpf}`).then(res => {
+                    if (res.status == 200) {
+                        window.location.replace("/game-creator");
+                    } else {
+                        alert("Esse CPF ja jogou o jogo, 1 jogada por pessoa");
+                    }
+                });
+            }
+        </script>
+        <center>
+            <div id="redirect" onclick="redirect()">
+                Entendi!
+            </div>
+        </center>
+    </main>
+</body>
+</html>
+
