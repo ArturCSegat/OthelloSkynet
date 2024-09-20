@@ -1,19 +1,35 @@
 <div id="game-info">
-    <div style="display: flex; flex-direction: column;">
-        <p>player 1 piece count: {{ p1_count }}</p>
-        <p>player 2 piece count: {{ p2_count }}</p>
-        <div style="display: flex; flex-direction: row;">
-            <p>turn:</p>
-            <div 
-                class="square" 
-                style='background-color: 
-                {% if turn == player1 %}
-                white
-                {% else %}
-                black 
-                {% endif %};'
-                >
-            </div>
+    <div>player 1 piece count: {{ p1_count }}</div>
+    <div>player 2 piece count: {{ p2_count }}</div>
+    <div style="display: flex; flex-direction: row;">
+        <p>turn:</p>
+        <div 
+            class="square" 
+            style='background-color: 
+            {% if turn == player1 %}
+            white
+            {% else %}
+            black 
+            {% endif %};'
+            >
         </div>
     </div>
+    <div
+        hx-get="/play/-1/-1"
+        hx-trigger="click"
+        hx-target=".game"
+        hx-swap="outerHTML"
+        class = "bttn"
+        >
+        Pass Turn
+    </div>
+        <div
+            hx-get="/play/-4/-4"
+            hx-trigger="click"
+            hx-target=".game"
+            hx-swap="outerHTML"
+            class = "bttn"
+            >
+            Give up
+        </div>
 </div>
