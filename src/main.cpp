@@ -15,39 +15,56 @@
 
 int main() {
     std::vector<std::unique_ptr<Game>> games = {};
-    std::vector<std::string> cpfs = {};
+    std::vector<std::string> keys = {};
 
     crow::App<crow::CookieParser> app;
 
-    CROW_ROUTE(app, "/")([](){
-            inja::Environment env {"templates/"};
+    // CROW_ROUTE(app, "/")([](){
+    //         inja::Environment env {"templates/"};
 
-            inja::json data;
-            auto page = env.render_file("intro.html", data);
+    //         inja::json data;
+    //         auto page = env.render_file("intro.html", data);
 
-            return page;
-            });
-    CROW_ROUTE(app, "/valid-cpf/<string>")([&cpfs](std::string cpf){
+    //         return page;
+    //         });
+    CROW_ROUTE(app, "/add-key/<string>")([&keys](std::string key){
             crow::response res;
-            for (const std::string x: cpfs) {
-                if (x == cpf) {
+            for (const std::string x: keys) {
+                if (x == key) {
                     res.code = 401;
+                    res.write("key already exists");
                     return res;
                 }
             }
             res.code = 200;
-            cpfs.push_back(cpf);
+            keys.push_back(key);
             return res;
-
-
             });
-    CROW_ROUTE(app, "/game-creator")([](){
+    CROW_ROUTE(app, "/game-creator")([&keys](const crow::request& req){
             inja::Environment env {"templates/"};
+
+            auto qstr = req.url_params;
+            auto key = std::string(qstr.get("key"));
+
+            crow::response res;
+            bool found = false; 
+            for (const auto &x: keys) {
+                if (x == key) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                res.code = 401;
+                res.write("invalid key");
+                return res;
+            }
 
             inja::json data;
             auto page = env.render_file("index.html", data);
+            res.write(page);
 
-            return page;
+            return res;
             });
     CROW_ROUTE(app, "/new-game/<int>/<int>")([&games](int id, int arg){
             inja::Environment env {"templates/"};
@@ -211,5 +228,5 @@ int main() {
             });
 
 
-    app.port(5000).multithreaded().run();
+    app.port(3000).multithreaded().run();
 }
