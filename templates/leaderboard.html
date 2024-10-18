@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de names e Pontuações</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        ul {
+            list-style-type: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ranking</h1>
+    <div class="container">
+        <div>
+        <h2>Nomes</h2>
+            <ol>
+                {% for name in names %}
+                <li>{{ name }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+        <div>
+            <ul>
+                <h2>Pontuações</h2>
+                {% for time in times %}
+                <li>{{ time }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

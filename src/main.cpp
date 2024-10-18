@@ -1,6 +1,7 @@
 #include "../includes/game.h"
 #include "../includes/cpuplayer.h"
 #include <algorithm>
+#include <chrono>
 #include <any>
 #include <array>
 #include <memory>
@@ -12,11 +13,44 @@
 #include "../includes/bot_builders.cpp"
 #include "../includes/avals.cpp"
 
-#define TEMPLATES "/home/othello/OthelloSkynet/templates/"
+#define TEMPLATES "./templates/"
+#define LEADERBOARD_SIZE 10
+
+struct leader_board_position {
+    std::string holder;
+    int time;
+};
+
+bool compare_leader_board_position(struct leader_board_position a, struct leader_board_position b) {
+    return a.time < b.time;
+}
 
 int main() {
     std::vector<std::unique_ptr<Game>> games = {};
     std::vector<std::string> keys = {};
+    std::vector<struct leader_board_position> leaderboard;
+
+    auto updateLeaderBoard = [&leaderboard](std::string nome, int tentativa_tempo) {
+        struct leader_board_position you = {nome, tentativa_tempo};
+        std::vector<struct leader_board_position> cp = leaderboard;
+        cp.push_back(you);
+        std::sort(cp.begin(), cp.end(), compare_leader_board_position);
+
+        if (cp.size() <= LEADERBOARD_SIZE) {
+            leaderboard = cp;
+            return;
+        }
+
+        for (int i = 0; i<LEADERBOARD_SIZE; i++) {
+            leaderboard[i] = cp[i];
+        }
+    };
+
+    auto printLeaderBoard = [&leaderboard]() {
+        for (auto const p : leaderboard) {
+            std::cout << "name: " << p.holder << " time: " << p.time << "\n";
+        }
+    };
 
     crow::App<crow::CookieParser> app;
 
@@ -116,7 +150,7 @@ int main() {
             int index = std::stoi(ctx.get_cookie("game"));
             auto& g = games[index];
 
-            if (i == -4 && j == -4) {
+            if (i == -4 && j == -4) { // /play/-4/-4 means give up
 
                 data["player1"] = g->players[0]->piece;
                 data["player2"] = g->players[1]->piece;
@@ -177,14 +211,26 @@ int main() {
             auto& g = games[index];
 
             if (g->isOver()) {
+                int winner_idx = g->players[1]->piece_count > g->players[0]->piece_count;
+                int reverse = g->players[0]->piece_count > g->players[1]->piece_count;
+
+                if (g->players[winner_idx]->piece == 'o') { // winer is player not bot
+                    std::cout << "we have a winner\n";
+                    auto now = std::chrono::steady_clock::now();
+                    std::chrono::duration<double> elapsed = now - g->moment_start;
+                    int time_since_start = elapsed.count();
+                    std::string nome = ctx.get_cookie("name");
+                    updateLeaderBoard(nome, time_since_start);
+                    printLeaderBoard();
+                } 
+                
+
                 data["player1"] = g->players[0]->piece;
                 data["player2"] = g->players[1]->piece;
                 data["available"] = 'a';
                 data["p1_count"] = g->players[0]->piece_count;
                 data["p2_count"] = g->players[1]->piece_count;
                 
-                int winner_idx = g->players[1]->piece_count > g->players[0]->piece_count;
-                int reverse = g->players[0]->piece_count > g->players[1]->piece_count;
 
                 std::string end_text;
 
@@ -227,6 +273,19 @@ int main() {
 
             return page;
             });
+CROW_ROUTE(app, "/leaderboard")([&leaderboard](){
+    inja::Environment env{TEMPLATES};
+    inja::json data;
+    std::vector<std::string> names;
+    std::vector<int> times;
+    for (auto const p:leaderboard){
+        names.push_back(p.holder);
+        times.push_back(p.time);
+    }
+    data["names"] = names;
+    data["times"] = times;
+    return env.render_file("leaderboard.html", data);
+});
 
 
     app.port(5000).multithreaded().run();

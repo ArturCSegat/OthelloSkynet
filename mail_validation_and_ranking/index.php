@@ -25,6 +25,16 @@
 
             <input type="submit" value="Enviar Chave">
         </form>
+        <center>
+            <h3>Ou</h3>
+        </center>
+        <h2 class="login-title">Entre com uma chave</h2>
+        <form action="verify_key.php" method="POST">
+            <label for="key">Chave:</label>
+            <input type="text" id="key" name="key" required><br><br>
+
+            <input type="submit" value="avaliar Chave">
+        </form>
     </div>
 
     <div class="rules-button-container">

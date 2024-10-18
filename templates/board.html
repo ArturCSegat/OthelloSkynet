@@ -3,7 +3,7 @@
         {% for square in row %}
         <div 
             class="square" 
-            hx-get="/othello/play/{{loop.parent.index}}/{{loop.index}}"
+            hx-get="/play/{{loop.parent.index}}/{{loop.index}}"
             hx-trigger="click"
             hx-target=".game"
             hx-swap="outerHTML"

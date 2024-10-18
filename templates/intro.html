@@ -222,7 +222,7 @@
                 }
                 fetch(`/valid-cpf/${cpf}`).then(res => {
                     if (res.status == 200) {
-                        window.location.replace("/othello/game-creator");
+                        window.location.replace("/game-creator");
                     } else {
                         alert("Esse CPF ja jogou o jogo, 1 jogada por pessoa");
                     }

@@ -4,14 +4,12 @@ use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php';
 
-session_start();
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = htmlspecialchars($_POST['name']);
     $email = htmlspecialchars($_POST['email']);
 
     // Generate random hexadecimal key
-    $key = bin2hex(random_bytes(16));
+    $key = bin2hex(random_bytes(3));
 
     // Store user information and key in a session
     $_SESSION['user'] = [
@@ -19,11 +17,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         'email' => $email,
         'key' => $key
     ];
+    setcookie("name", $name, time()+60*120, "/", "");
+    setcookie("email", $email, time()+60*120, "/", "");
+    setcookie("key", $key, time()+60*120, "/", "");
 
     // Send email via Gmail SMTP using PHPMailer
     $mail = new PHPMailer(true);
     // Create the link with the key as a query parameter
-    $validation_link = "https://oca.ctism.ufsm.br/~othello/validate_key.php?key=$key";
+    $validation_link = "http://localhost:3000/validate_key.php?key=$key";
 
     try {
         // SMTP configuration
@@ -47,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
         $mail->send();
-        echo "An email has been sent to $email with your key.";
+        header("location: /");
     } catch (Exception $e) {
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }

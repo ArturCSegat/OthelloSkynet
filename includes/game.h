@@ -6,6 +6,7 @@
 #include "player.h"
 #include <memory>
 #include <stack>
+#include <chrono>
 
 #define GAME_H
 class Game {
@@ -18,6 +19,7 @@ public:
     int play_count;
     bool running;
     std::vector<Coord> to_flip;
+    std::chrono::time_point<std::chrono::steady_clock> moment_start;
 
     Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square);
 

@@ -1,14 +1,13 @@
 <?php
-session_start();
 
 if (isset($_GET['key'])) {
     $entered_key = htmlspecialchars($_GET['key']);
 
-    if ($_SESSION['user']['key'] == $entered_key) {
+    if ($_COOKIE['key'] == $entered_key) {
         // Redirect to the game page
-        $xml = file_get_contents("https://oca.ctism.ufsm.br/othello/add-key/".$_GET["key"]);
+        $xml = file_get_contents("http://localhost:5000/add-key/".$_GET["key"]);
 
-        header("Location: https://oca.ctism.ufsm.br/othello/game-creator?key=".$_GET['key']);
+        header("Location: http://localhost:5000/game-creator?key=".$_GET['key']);
         exit();
     } else {
         echo "Invalid key.";

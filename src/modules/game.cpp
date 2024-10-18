@@ -4,9 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <stack>
-#include <math.h>
 
 Game::Game(std::unique_ptr<Player> player1, std::unique_ptr<Player> player2, char default_square) {
+    this->moment_start = std::chrono::steady_clock::now();
     int sm_idx = (GAME_N - 1) / 2;
     int bg_idx = sm_idx + 1;
 
