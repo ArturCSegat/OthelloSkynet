@@ -12,6 +12,7 @@
 #include "../includes/bot_builders.cpp"
 #include "../includes/avals.cpp"
 
+#define TEMPLATES "/home/othello/OthelloSkynet/templates/"
 
 int main() {
     std::vector<std::unique_ptr<Game>> games = {};
@@ -20,7 +21,7 @@ int main() {
     crow::App<crow::CookieParser> app;
 
     // CROW_ROUTE(app, "/")([](){
-    //         inja::Environment env {"templates/"};
+    //         inja::Environment env {TEMPLATES};
 
     //         inja::json data;
     //         auto page = env.render_file("intro.html", data);
@@ -41,7 +42,7 @@ int main() {
             return res;
             });
     CROW_ROUTE(app, "/game-creator")([&keys](const crow::request& req){
-            inja::Environment env {"templates/"};
+            inja::Environment env {TEMPLATES};
 
             auto qstr = req.url_params;
             auto key = std::string(qstr.get("key"));
@@ -67,7 +68,7 @@ int main() {
             return res;
             });
     CROW_ROUTE(app, "/new-game/<int>/<int>")([&games](int id, int arg){
-            inja::Environment env {"templates/"};
+            inja::Environment env {TEMPLATES};
             crow::response res;
             
             std::vector<std::any> args = {'x'};
@@ -107,7 +108,7 @@ int main() {
             });
 
     CROW_ROUTE(app, "/play/<int>/<int>")([&](const crow::request& req, int i, int j){
-            inja::Environment env {"templates/"};
+            inja::Environment env {TEMPLATES};
             inja::json data;
             crow::response res;
 
@@ -168,7 +169,7 @@ int main() {
             });
 
     CROW_ROUTE(app, "/bot")([&](const crow::request& req){
-            inja::Environment env {"templates/"};
+            inja::Environment env {TEMPLATES};
             inja::json data;
 
             auto& ctx = app.get_context<crow::CookieParser>(req);
@@ -228,5 +229,5 @@ int main() {
             });
 
 
-    app.port(3000).multithreaded().run();
+    app.port(5000).multithreaded().run();
 }
